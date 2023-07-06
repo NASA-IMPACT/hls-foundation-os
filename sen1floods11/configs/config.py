@@ -1,8 +1,18 @@
 import os
+import sys
 
-_base_ = ["../../../configs/_base_/default_runtime.py"]
-custom_imports = dict(imports=["projects.sen1floods11.geospatial_fm"])
+# base options
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+cudnn_benchmark = True
 
+
+project_root = '/u/fraccaro/Projects/general_libraries/hls-foundation-os/'
+sys.path.append(project_root)
+
+custom_imports = dict(imports=["sen1floods11.geospatial_fm"])
 
 ### Configs
 # Data
@@ -17,7 +27,7 @@ img_norm_cfg = dict(means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.207
                     stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221 , 0.06834774, 0.05294205])
 
 bands = [1, 2, 3, 8, 11, 12]
-tile_size = 224
+tile_size = img_size
 orig_nsize = 512
 crop_size = (tile_size, tile_size)
 
@@ -28,9 +38,9 @@ seg_map_suffix = f"_LabelHand.tif"
 
 
 splits = {
-    "train": "./projects/sen1floods11/data_splits/train_split.txt",
-    "val": "./projects/sen1floods11/data_splits/val_split.txt",
-    "test": "./projects/sen1floods11/data_splits/test_split.txt",
+    "train": project_root + "sen1floods11/data_splits/train_split.txt",
+    "val": project_root + "sen1floods11/data_splits/val_split.txt",
+    "test": project_root + "sen1floods11/data_splits/test_split.txt",
 }
 
 splits = {k: os.path.abspath(v) for (k, v) in splits.items()}
@@ -52,7 +62,7 @@ tubelet_size = 1
 
 # TRAINING
 # iterations = 5000
-epochs=100
+epochs=250
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
