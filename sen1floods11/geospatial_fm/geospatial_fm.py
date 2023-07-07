@@ -204,7 +204,7 @@ class ConvTransformerTokensToEmbeddingNeck(nn.Module):
         stride = 2
         dilation = 1
         padding = 0
-        output_padding = 1
+        output_padding = 0
         for _ in range(4):
             self.H_out = _convTranspose2dOutput(
                 self.H_out, stride, padding, dilation, kernel_size, output_padding
