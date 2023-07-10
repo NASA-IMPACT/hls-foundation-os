@@ -9,10 +9,13 @@ resume_from = None
 cudnn_benchmark = True
 
 
-project_root = '/u/fraccaro/Projects/general_libraries/hls-foundation-os/'
+## dinamically adding the project_root folder to allow custom imports
+project_root = str(os.path.abspath('.'))
+project_root = project_root if project_root[-1] == '/' else project_root + '/'
 sys.path.append(project_root)
 
-custom_imports = dict(imports=["sen1floods11.geospatial_fm"])
+custom_imports = dict(imports=["geospatial_fm"])
+
 
 ### Configs
 # Data
@@ -36,12 +39,15 @@ ann_dir = data_root + "v1.1/data/flood_events/HandLabeled/LabelHand"
 img_suffix = f"_S2Hand.tif"
 seg_map_suffix = f"_LabelHand.tif"
 
-
+# TO BE DEFINED BY USER: pick which test set here
+bolivia = False
+test_split = project_root + "data_splits/bolivia_split.txt" if bolivia else project_root + "data_splits/test_split.txt"
 splits = {
-    "train": project_root + "sen1floods11/data_splits/train_split.txt",
-    "val": project_root + "sen1floods11/data_splits/val_split.txt",
-    "test": project_root + "sen1floods11/data_splits/test_split.txt",
+    "train": project_root + "data_splits/train_split.txt",
+    "val": project_root + "data_splits/val_split.txt",
+    "test": test_split,
 }
+
 
 splits = {k: os.path.abspath(v) for (k, v) in splits.items()}
 
@@ -61,8 +67,7 @@ num_heads = 12
 tubelet_size = 1
 
 # TRAINING
-# iterations = 5000
-epochs=250
+epochs=50
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
