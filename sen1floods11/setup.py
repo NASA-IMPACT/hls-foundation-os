@@ -4,7 +4,6 @@ setup(
     name='geospatial_fm',
     version='0.1.0',    
     description='MMSegmentation classes for Sen1Floods11',
-    url='',
     author='Paolo Fraccaro, Carlos Gomes, Johannes Jakubik',
     packages=['geospatial_fm'],
     license="IBM",
