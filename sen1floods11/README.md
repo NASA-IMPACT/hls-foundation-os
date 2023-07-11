@@ -23,8 +23,9 @@ We provide a simple architecture in [the configuration file](./configs/config.py
 1. Clone this repository
 2. `conda create -n <environment-name> python==3.7.1`
 3. `conda activate <environment-name>`
-4. `pip install -r requirements.txt`
-5. `pip install "mmsegmentation==0.30"`
+4. `cd sen1floods11`
+5. Install torch and torchvision: `pip install torch==1.7.1 torchvision==0.8.2` (May vary with your system. Please check at https://pytorch.org/get-started/locally/)
+6. `pip install .`
 6. `pip install -U openmim`
 7. `mim install mmcv-full==1.5.0`
 
@@ -45,4 +46,4 @@ Download the dataset from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Fl
     
 
 ## Additional documentation
-This project builds on [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/). For additional documentation, consult their docs (please note this is currently version 0.30.0 of MMSegmentation, not latest).
+This project builds on [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) and [MMCV](https://mmcv.readthedocs.io/en/v1.5.0/). For additional documentation, consult their docs (please note this is currently version 0.30.0 of MMSegmentation and version 1.5.0 of MMCV, not latest).

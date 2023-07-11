@@ -8,11 +8,10 @@ load_from = None
 resume_from = None
 cudnn_benchmark = True
 
-
 ## dinamically adding the project_root folder to allow custom imports
 project_root = str(os.path.abspath('.'))
 project_root = project_root if project_root[-1] == '/' else project_root + '/'
-sys.path.append(project_root)
+# sys.path.append(project_root)
 
 custom_imports = dict(imports=["geospatial_fm"])
 
@@ -71,8 +70,8 @@ epochs=50
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
-experiment = "sen1floods11_exp"
-work_dir = os.path.join("/dccstor/cimf/paolo/test/", experiment)
+experiment = "sen1floods11_exp_trial_projects"
+work_dir = os.path.join("/dccstor/cimf/carlosgomes/test/", experiment)
 save_path = work_dir
 
 # Pipelines
@@ -215,7 +214,7 @@ checkpoint_config = dict(  # Config to set the checkpoint hook, Refer to https:/
 )
 
 evaluation = dict(
-    interval=eval_epoch_interval, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
+    interval=1, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
 )
 
 
