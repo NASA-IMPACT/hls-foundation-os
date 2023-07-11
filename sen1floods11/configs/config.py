@@ -198,7 +198,7 @@ checkpoint_config = dict(
 )
 
 evaluation = dict(
-    interval=1, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
+    interval=eval_epoch_interval, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
 )
 
 runner = dict(type="EpochBasedRunner", max_epochs=epochs)
