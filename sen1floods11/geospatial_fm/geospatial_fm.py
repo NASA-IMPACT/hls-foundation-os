@@ -281,9 +281,6 @@ class TemporalViTEncoder(nn.Module):
     """Encoder from an ViT with capability to take in temporal input.
 
     This class defines an encoder taken from a ViT architecture.
-
-    If the input bands (channels) are different from those the model was pretrained on, model_bands and pretrained_bands can be specified.
-    This will make the model discard weights used for the patch embedding which correspond to unseen bands.
     """
 
     def __init__(
@@ -299,9 +296,7 @@ class TemporalViTEncoder(nn.Module):
         mlp_ratio: float = 4.0,
         norm_layer: nn.Module = nn.LayerNorm,
         norm_pix_loss: bool = False,
-        pretrained: str = None,
-        model_bands: List[int] = None,
-        pretrained_bands: List[int] = None,
+        pretrained: str = None
     ):
         """
 
@@ -318,8 +313,6 @@ class TemporalViTEncoder(nn.Module):
             norm_layer (nn.Module, optional): Norm layer to be used. Defaults to nn.LayerNorm.
             norm_pix_loss (bool, optional): Whether to use Norm Pix Loss. Defaults to False.
             pretrained (str, optional): Path to pretrained encoder weights. Defaults to None.
-            model_bands (List[int], optional): Bands to be used by the model. Requires pretrained_bands to be specified if not None. Defaults to None.
-            pretrained_bands (List[int], optional): Bands the model was pretrained on. Requires model_bands to be specified if not None. Defaults to None.
         """
         super().__init__()
 
@@ -331,18 +324,6 @@ class TemporalViTEncoder(nn.Module):
         )
         num_patches = self.patch_embed.num_patches
         self.num_frames = num_frames
-
-        # self.model_bands = model_bands
-        # self.pretrained_bands = pretrained_bands
-        # if (
-        #     self.model_bands
-        #     and self.pretrained_bands is None
-        #     or self.pretrained_bands
-        #     and self.model_bands is None
-        # ):
-        #     raise Exception(
-        #         f"If one of model_bands or pretrained_bands is provided, the other must also be provided. Got model_bands: {model_bands}, pretrained_bands: {pretrained_bands}"
-        #     )
 
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
         self.pos_embed = nn.Parameter(
