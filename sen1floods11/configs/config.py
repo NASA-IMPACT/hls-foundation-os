@@ -1,5 +1,4 @@
 import os
-import sys
 
 # base options
 dist_params = dict(backend='nccl')
@@ -8,19 +7,14 @@ load_from = None
 resume_from = None
 cudnn_benchmark = True
 
-## dinamically adding the project_root folder to allow custom imports
-project_root = str(os.path.abspath('.'))
-project_root = project_root if project_root[-1] == '/' else project_root + '/'
-# sys.path.append(project_root)
-
 custom_imports = dict(imports=["geospatial_fm"])
 
 
 ### Configs
 # Data
 dataset_type = "Sen1Floods11"
-# TO BE DEFINED BY USER: Data root to HandLabeled folder ([...]/sen1floods11/v1.1/data/flood_events/HandLabeled)
-data_root = "/dccstor/geofm-finetuning/carlosgomes/sen1floods11/"
+# TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
+data_root = "<path to sen1floods11 root>"
 num_frames = 1
 img_size = 224
 num_workers = 2
@@ -38,16 +32,11 @@ ann_dir = data_root + "v1.1/data/flood_events/HandLabeled/LabelHand"
 img_suffix = f"_S2Hand.tif"
 seg_map_suffix = f"_LabelHand.tif"
 
-# TO BE DEFINED BY USER: pick which test set here
-bolivia = False
-test_split = project_root + "data_splits/bolivia_split.txt" if bolivia else project_root + "data_splits/test_split.txt"
 splits = {
-    "train": project_root + "data_splits/train_split.txt",
-    "val": project_root + "data_splits/val_split.txt",
-    "test": test_split,
+    "train": "data_splits/train_split.txt",
+    "val": "data_splits/val_split.txt",
+    "test": "data_splits/test_split.txt",
 }
-
-
 splits = {k: os.path.abspath(v) for (k, v) in splits.items()}
 
 ignore_index = 2
@@ -58,7 +47,7 @@ constant = 0.0001
 
 # Model
 # TO BE DEFINED BY USER: path to pretrained backbone weights
-pretrained_weights_path = "/dccstor/geofm-finetuning/pretrain_ckpts/mae_weights/2023-04-29_21-50-47/epoch-725-loss-0.0365.pt"
+pretrained_weights_path = "<path to pretrained weights>"
 num_layers = 12
 patch_size = 16
 embed_dim = 768
@@ -70,8 +59,9 @@ epochs=50
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
-experiment = "sen1floods11_exp_trial_projects"
-work_dir = os.path.join("/dccstor/cimf/carlosgomes/test/", experiment)
+experiment = "<experiment name>"
+project_dir = "<project directory>"
+work_dir = os.path.join(project_dir, experiment)
 save_path = work_dir
 
 # Pipelines
@@ -196,11 +186,6 @@ lr_config = dict(
     by_epoch=False,
 )
 
-# log_config = dict(
-#     interval=10, hooks=[dict(type="TextLoggerHook"), dict(type="TensorboardLoggerHook")],
-    
-# )
-
 log_config = dict(
     interval=10,
     hooks=[
@@ -208,21 +193,17 @@ log_config = dict(
         dict(type='TensorboardLoggerHook', by_epoch=True),
     ])
 
-# This checkpoint config is later overwritten to allow for better logging in mmseg/apis/train.py l. 163
-checkpoint_config = dict(  # Config to set the checkpoint hook, Refer to https://github.com/open-mmlab/mmcv/blob/master/mmcv/runner/hooks/checkpoint.py for implementation.
-    by_epoch=True, interval=10, out_dir=save_path  # Whether count by epoch or not.
+checkpoint_config = dict(
+    by_epoch=True, interval=10, out_dir=save_path 
 )
 
 evaluation = dict(
     interval=1, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
 )
 
-
-# runner = dict(type="IterBasedRunner", max_iters=iterations)
 runner = dict(type="EpochBasedRunner", max_epochs=epochs)
 
 workflow = [("train", 1),("val", 1)]
-
 
 norm_cfg = dict(type="BN", requires_grad=True)
 
