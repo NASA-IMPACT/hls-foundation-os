@@ -26,8 +26,8 @@ We provide a simple architecture in [the configuration file](./configs/config.py
 4. `cd sen1floods11`
 5. Install torch and torchvision: `pip install torch torchvision` (May vary with your system. Please check at https://pytorch.org/get-started/locally/)
 6. `pip install .`
-6. `pip install -U openmim`
-7. `mim install mmcv-full==1.5.0` (This may take a while for torch > 1.7.1, as wheel must be built)
+7. `pip install -U openmim`
+8. `mim install mmcv-full==1.5.0` (This may take a while for torch > 1.7.1, as wheel must be built)
 
 ### Data
 Download the dataset from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11).
