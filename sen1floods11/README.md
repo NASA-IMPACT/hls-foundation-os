@@ -8,7 +8,7 @@ We provide a pretrained backbone that can be used for various downstream remote 
 
 To finetune for these tasks in this repository, we make use of [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/), which provides an extensible framework for segmentation tasks. 
 
-[MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) allows us to concatenate necks and heads appropriate for any segmentation downstream task to the encoder, and then perform the finetuning. This only requires the setup of a [configuration file](./configs/geospatial_fm_sen1floods11_finetune.py) detailing the desired model architecture, dataset setup and training strategy. 
+[MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) allows us to concatenate necks and heads appropriate for any segmentation downstream task to the encoder, and then perform the finetuning. This only requires the setup of a [configuration file](./configs/config.py) detailing the desired model architecture, dataset setup and training strategy. 
 
 We build extensions on top of [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) to support our encoder and provide classes to read and augment remote sensing data (from .tiff files) using [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) data pipelines. These extensions can be found in the [sen1floods11](./geospatial_fm/) directory. If more advanced functionality is necessary, it should be added there.
 
@@ -33,7 +33,7 @@ We provide a simple architecture in [the configuration file](./configs/config.py
 Download the dataset from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11).
 
 ## Running the code
-1. Complete the [configuration file](./configs/geospatial_fm_sen1floods11_finetune.py) with your setup specifications. Parts that must be completed are marked with `#TO BE DEFINED BY USER`. They relate to where you downloaded the dataset, pretrained model weights, test set (e.g. regular one or Bolivia out of bag data) and where you are going to save the experiment outputs.
+1. Complete the [configuration file](./configs/config.py) with your setup specifications. Parts that must be completed are marked with `#TO BE DEFINED BY USER`. They relate to where you downloaded the dataset, pretrained model weights, test set (e.g. regular one or Bolivia out of bag data) and where you are going to save the experiment outputs.
 
 2. 
     a. With the conda env created above activated and from the `sen1floods11` folder, run:
