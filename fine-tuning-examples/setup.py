@@ -6,7 +6,7 @@ setup(
     description='MMSegmentation classes for Sen1Floods11',
     author='Paolo Fraccaro, Carlos Gomes, Johannes Jakubik',
     packages=['geospatial_fm'],
-    license="IBM",
+    license="Apache 2",
     long_description=open("README.md").read(),
     install_requires=
     [

@@ -12,42 +12,41 @@ custom_imports = dict(imports=["geospatial_fm"])
 
 ### Configs
 # Data
-dataset_type = "Sen1Floods11"
+dataset_type = "FireScars"
 # TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
-data_root = "<path to sen1floods11 root>"
+# data_root = "<path to firescars root>"
+data_root = '/dccstor/geofm-finetuning/fire-scars/finetune-data/6_bands_no_replant_extended/'
+
 num_frames = 1
 img_size = 224
 num_workers = 2
+samples_per_gpu = 8
 
-img_norm_cfg = dict(means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526,0.12046503],
-                    stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221 , 0.06834774, 0.05294205])
+img_norm_cfg = dict(
+    means=[0.033349706741586264, 0.05701185520536176, 0.05889748132001316, 0.2323245113436119,
+           0.1972854853760658, 0.11944914225186566],
+    stds=[0.02269135568823774, 0.026807560223070237, 0.04004109844362779, 0.07791732423672691,
+          0.08708738838140137, 0.07241979477437814])  ## change the mean and std of all the bands
 
-bands = [1, 2, 3, 8, 11, 12]
+bands = [0, 1, 2, 3, 4, 5]
+
 tile_size = img_size
 orig_nsize = 512
 crop_size = (tile_size, tile_size)
 
-img_dir = data_root + "v1.1/data/flood_events/HandLabeled/S2Hand"
-ann_dir = data_root + "v1.1/data/flood_events/HandLabeled/LabelHand"
-img_suffix = f"_S2Hand.tif"
-seg_map_suffix = f"_LabelHand.tif"
+img_suffix = "_merged.tif"
+seg_map_suffix = ".mask.tif"
 
-splits = {
-    "train": "data_splits/train_split.txt",
-    "val": "data_splits/val_split.txt",
-    "test": "data_splits/test_split.txt",
-}
-splits = {k: os.path.abspath(v) for (k, v) in splits.items()}
 
 ignore_index = 2
 label_nodata = -1
 image_nodata = -9999
 image_nodata_replace = 0
-constant = 0.0001
+image_to_float32 = True
 
 # Model
 # TO BE DEFINED BY USER: path to pretrained backbone weights
-pretrained_weights_path = "<path to pretrained weights>"
+pretrained_weights_path = "/dccstor/geofm-finetuning/pretrain_ckpts/mae_weights/2023-04-29_21-50-47/epoch-725-loss-0.0365.pt"
 num_layers = 12
 patch_size = 16
 embed_dim = 768
@@ -59,8 +58,8 @@ epochs=50
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
-experiment = "<experiment name>"
-project_dir = "<project directory>"
+experiment = "test"
+project_dir = '/dccstor/geofm-finetuning/fire-scars/os'
 work_dir = os.path.join(project_dir, experiment)
 save_path = work_dir
 
@@ -68,7 +67,7 @@ save_path = work_dir
 train_pipeline = [
     dict(
         type="LoadGeospatialImageFromFile",
-        to_float32=False,
+        to_float32=image_to_float32,
         nodata=image_nodata,
         nodata_replace=image_nodata_replace,
     ),
@@ -79,7 +78,6 @@ train_pipeline = [
         nodata_replace=ignore_index,
     ),
     dict(type="BandsExtract", bands=bands),
-    dict(type="ConstantMultiply", constant=constant),
     dict(type="RandomFlip", prob=0.5),
     dict(type="ToTensor", keys=["img", "gt_semantic_seg"]),
     dict(type="TorchNormalize", **img_norm_cfg),
@@ -98,12 +96,11 @@ train_pipeline = [
 test_pipeline = [
     dict(
         type="LoadGeospatialImageFromFile",
-        to_float32=False,
+        to_float32=image_to_float32,
         nodata=image_nodata,
         nodata_replace=image_nodata_replace,
     ),
     dict(type="BandsExtract", bands=bands),
-    dict(type="ConstantMultiply", constant=constant),
     dict(type="ToTensor", keys=["img"]),
     dict(type="TorchNormalize", **img_norm_cfg),
     dict(
@@ -135,40 +132,37 @@ test_pipeline = [
 
 # Dataset
 data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=samples_per_gpu,
     workers_per_gpu=num_workers,
     train=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir=img_dir,
-        ann_dir=ann_dir,
+        img_dir='training',
+        ann_dir='training',
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=train_pipeline,
         ignore_index=ignore_index,
-        split=splits["train"],
     ),
     val=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir=img_dir,
-        ann_dir=ann_dir,
+        img_dir='validation',
+        ann_dir='validation',
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=test_pipeline,
         ignore_index=ignore_index,
-        split=splits["val"],
     ),
     test=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir=img_dir,
-        ann_dir=ann_dir,
+        img_dir='validation',
+        ann_dir='validation',
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=test_pipeline,
         ignore_index=ignore_index,
-        split=splits["test"],
         gt_seg_map_loader_cfg=dict(nodata=label_nodata, nodata_replace=ignore_index),
     ),
 )
@@ -207,8 +201,6 @@ workflow = [("train", 1),("val", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
 
-ce_weights = [0.3, 0.7, 0]
-
 model = dict(
     type="TemporalEncoderDecoder",
     frozen_backbone=False,
@@ -246,11 +238,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type="CrossEntropyLoss",
-            use_sigmoid=False,
-            loss_weight=1,
-            class_weight=ce_weights,
-        ),
+            type='DiceLoss', use_sigmoid=False, loss_weight=1),
     ),
     auxiliary_head=dict(
         num_classes=3,
@@ -263,12 +251,7 @@ model = dict(
         dropout_ratio=0.1,
         norm_cfg=norm_cfg,
         align_corners=False,
-        loss_decode=dict(
-            type="CrossEntropyLoss",
-            use_sigmoid=False,
-            loss_weight=1,
-            class_weight=ce_weights,
-        ),
+        loss_decode=dict(type='DiceLoss', use_sigmoid=False, loss_weight=1),
     ),
     train_cfg=dict(),
     test_cfg=dict(mode="slide", stride=(int(tile_size/2), int(tile_size/2)), crop_size=(tile_size, tile_size)),

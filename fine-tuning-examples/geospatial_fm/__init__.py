@@ -7,11 +7,12 @@ from .geospatial_pipelines import (
     CastTensor,
     CollectTestList
 )
-from .sen1floods11 import Sen1Floods11
+from .datasets import Sen1Floods11, FireScars
 from .temporal_encoder_decoder import TemporalEncoderDecoder
 
 __all__ = [
     "Sen1Floods11",
+    "FireScars",
     "TemporalViTEncoder",
     "ConvTransformerTokensToEmbeddingNeck",
     "LoadGeospatialAnnotations",
