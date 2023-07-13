@@ -1,5 +1,5 @@
 # Image segmentation by foundation model finetuning
-This repository shows two examples of how the geospatial foundation model can be finetuned for downstream tasks. These are flood detection using the [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11) dataset and fire scars detection using the NASA fire scars dataset [NASA fire scars dataset](link)
+This repository shows two examples of how the geospatial foundation model can be finetuned for downstream tasks. These are flood detection using the [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11) dataset and fire scars detection using the NASA fire scars dataset [NASA fire scars dataset](https://huggingface.co/datasets/nasa-impact/hls_burn_scars)
 
 ## The approach
 ### Background
@@ -29,20 +29,28 @@ We provide a simple architecture in [the configuration file](./configs/config.py
 8. `mim install mmcv-full==1.5.0` (This may take a while for torch > 1.7.1, as wheel must be built)
 
 ### Data
-Download the dataset from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11).
+
+Download the flood detection dataset from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11).
+
+
+Download the fire scars detection dataset from [Hugging Face](https://huggingface.co/datasets/nasa-impact/hls_burn_scars).
+
 
 ## Running the code
-1. Complete the [configuration file](./configs/config.py) with your setup specifications. Parts that must be completed are marked with `#TO BE DEFINED BY USER`. They relate to where you downloaded the dataset, pretrained model weights, test set (e.g. regular one or Bolivia out of bag data) and where you are going to save the experiment outputs.
+1. Complete the configs with your setup specifications. Parts that must be completed are marked with `#TO BE DEFINED BY USER`. They relate to where you downloaded the dataset, pretrained model weights, test set (e.g. regular one or Bolivia out of bag data) and where you are going to save the experiment outputs.
 
 2. 
-    a. With the conda env created above activated and from the `sen1floods11` folder, run:
+    a. With the conda env created above activated and from the `fine-tuning-examples` folder, run:
     
-    `mim train mmsegmentation --launcher pytorch configs/config.py`
+    `mim train mmsegmentation --launcher pytorch configs/sen1floods11_config.py` or 
+    
+    `mim train mmsegmentation --launcher pytorch configs/firescars_config.py` 
 
     b. To run testing: 
     
-    `mim test mmsegmentation configs/config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"`
+    `mim test mmsegmentation configs/sen1floods11_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or 
     
-
+    `mim test mmsegmentation configs/firescars_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"`
+    
 ## Additional documentation
 This project builds on [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) and [MMCV](https://mmcv.readthedocs.io/en/v1.5.0/). For additional documentation, consult their docs (please note this is currently version 0.30.0 of MMSegmentation and version 1.5.0 of MMCV, not latest).

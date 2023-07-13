@@ -14,8 +14,7 @@ custom_imports = dict(imports=["geospatial_fm"])
 # Data
 dataset_type = "FireScars"
 # TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
-# data_root = "<path to firescars root>"
-data_root = '/dccstor/geofm-finetuning/fire-scars/finetune-data/6_bands_no_replant_extended/'
+data_root = "<path to firescars root>"
 
 num_frames = 1
 img_size = 224
@@ -46,7 +45,7 @@ image_to_float32 = True
 
 # Model
 # TO BE DEFINED BY USER: path to pretrained backbone weights
-pretrained_weights_path = "/dccstor/geofm-finetuning/pretrain_ckpts/mae_weights/2023-04-29_21-50-47/epoch-725-loss-0.0365.pt"
+pretrained_weights_path = "<path to pretrained weights>"
 num_layers = 12
 patch_size = 16
 embed_dim = 768
@@ -58,8 +57,8 @@ epochs=50
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
-experiment = "test"
-project_dir = '/dccstor/geofm-finetuning/fire-scars/os'
+experiment = "<experiment name>"
+project_dir = "<project directory>"
 work_dir = os.path.join(project_dir, experiment)
 save_path = work_dir
 
