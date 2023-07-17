@@ -15,11 +15,10 @@ custom_imports = dict(imports=["geospatial_fm"])
 dataset_type = "FireScars"
 # TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
 data_root = "<path to firescars root>"
-
 num_frames = 1
 img_size = 224
-num_workers = 2
-samples_per_gpu = 8
+num_workers = 4
+samples_per_gpu = 4
 
 img_norm_cfg = dict(
     means=[0.033349706741586264, 0.05701185520536176, 0.05889748132001316, 0.2323245113436119,
@@ -37,8 +36,7 @@ img_suffix = "_merged.tif"
 seg_map_suffix = ".mask.tif"
 
 
-ignore_index = 2
-label_nodata = -1
+ignore_index = -1
 image_nodata = -9999
 image_nodata_replace = 0
 image_to_float32 = True
@@ -67,14 +65,10 @@ train_pipeline = [
     dict(
         type="LoadGeospatialImageFromFile",
         to_float32=image_to_float32,
-        nodata=image_nodata,
-        nodata_replace=image_nodata_replace,
     ),
     dict(
         type="LoadGeospatialAnnotations",
-        reduce_zero_label=False,
-        nodata=label_nodata,
-        nodata_replace=ignore_index,
+        reduce_zero_label=False
     ),
     dict(type="BandsExtract", bands=bands),
     dict(type="RandomFlip", prob=0.5),
@@ -96,8 +90,6 @@ test_pipeline = [
     dict(
         type="LoadGeospatialImageFromFile",
         to_float32=image_to_float32,
-        nodata=image_nodata,
-        nodata_replace=image_nodata_replace,
     ),
     dict(type="BandsExtract", bands=bands),
     dict(type="ToTensor", keys=["img"]),
@@ -161,13 +153,12 @@ data = dict(
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=test_pipeline,
-        ignore_index=ignore_index,
-        gt_seg_map_loader_cfg=dict(nodata=label_nodata, nodata_replace=ignore_index),
+        ignore_index=ignore_index
     ),
 )
 
 # Training
-optimizer = dict(type="Adam", lr=6e-5, weight_decay=0.05)
+optimizer = dict(type="Adam", lr=1.5e-5, betas=(0.9, 0.999),  weight_decay=0.05)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy="poly",
@@ -180,23 +171,23 @@ lr_config = dict(
 )
 
 log_config = dict(
-    interval=10,
+    interval=20,
     hooks=[
-        dict(type='TextLoggerHook', by_epoch=True),
-        dict(type='TensorboardLoggerHook', by_epoch=True),
+        dict(type='TextLoggerHook', by_epoch=False),
+        dict(type='TensorboardLoggerHook', by_epoch=False),
     ])
 
 checkpoint_config = dict(
-    by_epoch=True, interval=10, out_dir=save_path 
+    by_epoch=True, interval=10, out_dir=save_path, 
 )
 
 evaluation = dict(
-    interval=eval_epoch_interval, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
+    interval=1180, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=False
 )
 
-runner = dict(type="EpochBasedRunner", max_epochs=epochs)
-
-workflow = [("train", 1),("val", 1)]
+# runner = dict(type="EpochBasedRunner", max_epochs=epochs)
+runner = dict(type='IterBasedRunner', max_iters=6300)
+workflow = [("train", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
 
@@ -226,7 +217,7 @@ model = dict(
         Wp=img_size // patch_size,
     ),
     decode_head=dict(
-        num_classes=3,
+        num_classes=2,
         in_channels=embed_dim,
         type="FCNHead",
         in_index=-1,
@@ -237,10 +228,10 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='DiceLoss', use_sigmoid=False, loss_weight=1),
+            type='DiceLoss', use_sigmoid=False, loss_weight=1, ignore_index=ignore_index),
     ),
     auxiliary_head=dict(
-        num_classes=3,
+        num_classes=2,
         in_channels=embed_dim,
         type="FCNHead",
         in_index=-1,
@@ -250,7 +241,7 @@ model = dict(
         dropout_ratio=0.1,
         norm_cfg=norm_cfg,
         align_corners=False,
-        loss_decode=dict(type='DiceLoss', use_sigmoid=False, loss_weight=1),
+        loss_decode=dict(type='DiceLoss', use_sigmoid=False, loss_weight=1, ignore_index=ignore_index),
     ),
     train_cfg=dict(),
     test_cfg=dict(mode="slide", stride=(int(tile_size/2), int(tile_size/2)), crop_size=(tile_size, tile_size)),
