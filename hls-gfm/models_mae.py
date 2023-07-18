@@ -17,9 +17,38 @@ import torch.nn as nn
 from timm.models.vision_transformer import Block
 from timm.models.layers import to_2tuple, _assert
 
-from .util.pos_embed import get_3d_sincos_pos_embed
+import numpy as np
 
 from einops import rearrange
+
+def get_3d_sincos_pos_embed(embed_dim, grid_size, cls_token=False):
+    """
+    grid_size: 3d tuple of grid size: t, h, w
+    return:
+    pos_embed: L, D
+    """
+
+    assert embed_dim % 16 == 0
+
+    t_size, h_size, w_size = grid_size
+
+    w_embed_dim = embed_dim // 16 * 6
+    h_embed_dim = embed_dim // 16 * 6
+    t_embed_dim = embed_dim // 16 * 4
+
+    w_pos_embed = get_1d_sincos_pos_embed_from_grid(w_embed_dim, np.arange(w_size))
+    h_pos_embed = get_1d_sincos_pos_embed_from_grid(h_embed_dim, np.arange(h_size))
+    t_pos_embed = get_1d_sincos_pos_embed_from_grid(t_embed_dim, np.arange(t_size))
+
+    w_pos_embed = np.tile(w_pos_embed, (t_size * h_size, 1))
+    h_pos_embed = np.tile(np.repeat(h_pos_embed, w_size, axis=0), (t_size, 1))
+    t_pos_embed = np.repeat(t_pos_embed, h_size * w_size, axis=0)
+
+    pos_embed = np.concatenate((w_pos_embed, h_pos_embed, t_pos_embed), axis=1)
+
+    if cls_token:
+        pos_embed = np.concatenate([np.zeros([1, embed_dim]), pos_embed], axis=0)
+    return pos_embed
 
 
 class PatchEmbed(nn.Module):
