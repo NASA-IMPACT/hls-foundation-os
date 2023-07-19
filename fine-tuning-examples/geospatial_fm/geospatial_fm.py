@@ -180,9 +180,11 @@ class ConvTransformerTokensToEmbeddingNeck(nn.Module):
         self,
         embed_dim: int,
         output_embed_dim: int,
+        # num_frames: int = 1,
         Hp: int = 14,
         Wp: int = 14,
         drop_cls_token: bool = True,
+        
     ):
         """
 
@@ -199,6 +201,7 @@ class ConvTransformerTokensToEmbeddingNeck(nn.Module):
         self.Wp = Wp
         self.H_out = Hp
         self.W_out = Wp
+        # self.num_frames = num_frames
 
         kernel_size = 2
         stride = 2
@@ -217,19 +220,19 @@ class ConvTransformerTokensToEmbeddingNeck(nn.Module):
         self.output_embed_dim = output_embed_dim
         self.fpn1 = nn.Sequential(
             nn.ConvTranspose2d(
-                embed_dim,
-                embed_dim,
+                self.embed_dim,
+                self.output_embed_dim,
                 kernel_size=kernel_size,
                 stride=stride,
                 dilation=dilation,
                 padding=padding,
                 output_padding=output_padding,
             ),
-            Norm2d(embed_dim),
+            Norm2d(self.output_embed_dim),
             nn.GELU(),
             nn.ConvTranspose2d(
-                embed_dim,
-                output_embed_dim,
+                self.output_embed_dim,
+                self.output_embed_dim,
                 kernel_size=kernel_size,
                 stride=stride,
                 dilation=dilation,
@@ -239,19 +242,19 @@ class ConvTransformerTokensToEmbeddingNeck(nn.Module):
         )
         self.fpn2 = nn.Sequential(
             nn.ConvTranspose2d(
-                output_embed_dim,
-                output_embed_dim,
+                self.output_embed_dim,
+                self.output_embed_dim,
                 kernel_size=kernel_size,
                 stride=stride,
                 dilation=dilation,
                 padding=padding,
                 output_padding=output_padding,
             ),
-            Norm2d(output_embed_dim),
+            Norm2d(self.output_embed_dim),
             nn.GELU(),
             nn.ConvTranspose2d(
-                output_embed_dim,
-                output_embed_dim,
+                self.output_embed_dim,
+                self.output_embed_dim,
                 kernel_size=kernel_size,
                 stride=stride,
                 dilation=dilation,
