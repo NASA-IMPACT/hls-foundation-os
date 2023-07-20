@@ -21,6 +21,7 @@ num_frames = 1
 img_size = 224
 num_workers = 2
 samples_per_gpu = 4
+CLASSES=(0,1,2)
 
 img_norm_cfg = dict(means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526,0.12046503],
                     stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221 , 0.06834774, 0.05294205])
@@ -142,6 +143,7 @@ data = dict(
     workers_per_gpu=num_workers,
     train=dict(
         type=dataset_type,
+        CLASSES=CLASSES,
         data_root=data_root,
         img_dir=img_dir,
         ann_dir=ann_dir,
@@ -153,6 +155,7 @@ data = dict(
     ),
     val=dict(
         type=dataset_type,
+        CLASSES=CLASSES,
         data_root=data_root,
         img_dir=img_dir,
         ann_dir=ann_dir,
@@ -164,6 +167,7 @@ data = dict(
     ),
     test=dict(
         type=dataset_type,
+        CLASSES=CLASSES,
         data_root=data_root,
         img_dir=img_dir,
         ann_dir=ann_dir,
