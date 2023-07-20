@@ -12,9 +12,11 @@ custom_imports = dict(imports=["geospatial_fm"])
 
 ### Configs
 # Data
-dataset_type = "Sen1Floods11"
 # TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
 data_root = "<path to sen1floods11 root>"
+
+dataset_type = "GeospatialDataset"
+num_classes=3
 num_frames = 1
 img_size = 224
 num_workers = 2
@@ -229,14 +231,14 @@ model = dict(
     ),
     neck=dict(
         type="ConvTransformerTokensToEmbeddingNeck",
-        embed_dim=embed_dim,
+        embed_dim=num_frames*embed_dim,
         output_embed_dim=embed_dim,
         drop_cls_token=True,
         Hp=img_size // patch_size,
         Wp=img_size // patch_size,
     ),
     decode_head=dict(
-        num_classes=3,
+        num_classes=num_classes,
         in_channels=embed_dim,
         type="FCNHead",
         in_index=-1,
@@ -254,7 +256,7 @@ model = dict(
         ),
     ),
     auxiliary_head=dict(
-        num_classes=3,
+        num_classes=num_classes,
         in_channels=embed_dim,
         type="FCNHead",
         in_index=-1,
