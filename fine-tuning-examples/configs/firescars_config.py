@@ -153,7 +153,7 @@ data = dict(
     ),
     test=dict(
         type=dataset_type,
-        CLASSES,CLASSES
+        CLASSES=CLASSES,
         data_root=data_root,
         img_dir='validation',
         ann_dir='validation',

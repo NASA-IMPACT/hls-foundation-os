@@ -54,7 +54,7 @@ orig_nsize = 512
 crop_size = (tile_size, tile_size)
 train_pipeline = [
     dict(type='LoadGeospatialImageFromFile', to_float32=True),
-    dict(type='LoadGeospatialAnnotations', reduce_zero_label=False),
+    dict(type='LoadGeospatialAnnotations', reduce_zero_label=True),
     dict(type='RandomFlip', prob=0.5),
     dict(type='ToTensor', keys=['img', 'gt_semantic_seg']),
     dict(type='TorchNormalize', **img_norm_cfg),
@@ -67,7 +67,7 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadGeospatialImageFromFile', to_float32=True),
-    dict(type='LoadGeospatialAnnotations', reduce_zero_label=False),
+    dict(type='LoadGeospatialAnnotations', reduce_zero_label=True),
     dict(type='ToTensor', keys=['img', 'gt_semantic_seg']),
     dict(type='TorchNormalize', **img_norm_cfg),
     dict(type='TorchRandomCrop', crop_size=crop_size),
@@ -94,42 +94,42 @@ test_pipeline = [
 CLASSES=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
 
 data = dict(
-    samples_per_gpu=2,
-    workers_per_gpu=1,
+    samples_per_gpu=8,
+    workers_per_gpu=4,
     train=dict(
         type=dataset_type,
         CLASSES=CLASSES,
+        reduce_zero_label=True,
         data_root=data_root,
         img_dir= data_root + "training_chips",
         ann_dir=data_root + "training_chips",
         pipeline=train_pipeline,
         img_suffix='_merged.tif',
         seg_map_suffix='.mask.tif',
-        ignore_index=None,
         split = splits['train']
     ),
     val=dict(
         type=dataset_type,
         CLASSES=CLASSES,
+        reduce_zero_label=True,
         data_root=data_root,
         img_dir= data_root + "validation_chips",
         ann_dir=data_root + "validation_chips",
         pipeline=test_pipeline,
         img_suffix='_merged.tif',
         seg_map_suffix='.mask.tif',
-        ignore_index=None,
         split = splits['val']
     ),
     test=dict(
         type=dataset_type,
         CLASSES=CLASSES,
+        reduce_zero_label=True,
         data_root=data_root,
         img_dir= data_root + "validation_chips",
         ann_dir=data_root + "validation_chips",
         pipeline=test_pipeline,
         img_suffix='_merged.tif',
         seg_map_suffix='.mask.tif',
-        ignore_index=None,
         split = splits['test']))
         #gt_seg_map_loader_cfg=dict(nodata=-1, nodata_replace=2)))
 
@@ -150,23 +150,24 @@ log_config = dict(
     interval=10,
     hooks=[
         dict(type='TextLoggerHook'),
+        dict(type='TensorboardLoggerHook'),
     ])
 
 # This checkpoint config is later overwritten to allow for better logging in mmseg/apis/train.py l. 163
 checkpoint_config = dict(
     # Config to set the checkpoint hook, Refer to https://github.com/open-mmlab/mmcv/blob/master/mmcv/runner/hooks/checkpoint.py for implementation.
     by_epoch=False,  # Whether count by epoch or not.
-    interval=24000,
+    interval=10000,
     out_dir=save_path)
 
-evaluation = dict(interval=1700, metric='mIoU', pre_eval=True, save_best='mIoU')
+evaluation = dict(interval=1000, metric='mIoU', pre_eval=True, save_best='mIoU')
 reduce_train_set = dict(reduce_train_set=False)
 reduce_factor = dict(reduce_factor=1)
 
 optimizer_config = dict(grad_clip=None)
 
 
-runner = dict(type='IterBasedRunner', max_iters=25000)
+runner = dict(type='IterBasedRunner', max_iters=10000)
 # workflow = [('train',1)]  # Workflow for runner. [('train', 1)] means there is only one workflow and the workflow named 'train' is executed once. The workflow trains the model by 40000 iterations according to the `runner.max_iters`.
 # workflow = [('train', 1),('val', 1)]
 workflow = [('train', 1)]
@@ -180,7 +181,7 @@ loss_weights_multi = [1.5652886 ,  0.46067129,  0.59387921,  0.48431193,  0.6555
         0.83456613]
 
 # loss_func = dict(type='DiceLoss', use_sigmoid=False, loss_weight=1, class_weight=loss_weights_multi)
-loss_func = dict(type="CrossEntropyLoss", use_sigmoid=False, loss_weight=1, class_weight=loss_weights_multi)
+loss_func = dict(type="CrossEntropyLoss", use_sigmoid=False, class_weight=loss_weights_multi, avg_non_ignore=True)
 
 
 output_embed_dim = embed_dim*num_frames
