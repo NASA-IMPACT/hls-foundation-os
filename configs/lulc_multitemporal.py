@@ -181,7 +181,7 @@ loss_weights_multi = [1.5652886 ,  0.46067129,  0.59387921,  0.48431193,  0.6555
         0.83456613]
 
 # loss_func = dict(type='DiceLoss', use_sigmoid=False, loss_weight=1, class_weight=loss_weights_multi)
-loss_func = dict(type="CrossEntropyLoss", use_sigmoid=False, class_weight=loss_weights_multi, avg_non_ignore=True)
+loss_func = dict(type="DiceLoss", use_sigmoid=False, class_weight=loss_weights_multi, avg_non_ignore=True)
 
 
 output_embed_dim = embed_dim*num_frames
