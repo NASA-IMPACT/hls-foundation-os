@@ -22,11 +22,10 @@ We provide a simple architecture in [the configuration file](./configs/config.py
 1. Clone this repository
 2. `conda create -n <environment-name> python==3.9`
 3. `conda activate <environment-name>`
-4. `cd fine-tuning-examples`
-5. Install torch and torchvision: `pip install torch==1.7.1 torchvision==0.8.2` (May vary with your system. Please check at https://pytorch.org/get-started/locally/)
-6. `pip install .`
-7. `pip install -U openmim`
-8. `mim install mmcv-full==1.5.0` (This may take a while for torch > 1.7.1, as wheel must be built)
+4. Install torch and torchvision: `pip install torch==1.7.1 torchvision==0.8.2` (May vary with your system. Please check at https://pytorch.org/get-started/locally/)
+5. `pip install .`
+6. `pip install -U openmim`
+7. `mim install mmcv-full==1.5.0` (This may take a while for torch > 1.7.1, as wheel must be built)
 
 ### Data
 
