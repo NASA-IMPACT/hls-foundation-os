@@ -1,4 +1,4 @@
-from .geospatial_fm import ConvTransformerTokensToEmbeddingNeck, TemporalViTEncoder
+from .geospatial_fm import ConvTransformerTokensToEmbeddingNeck, TemporalViTEncoder, GeospatialNeck
 from .geospatial_pipelines import (
     TorchRandomCrop,
     LoadGeospatialAnnotations,
@@ -20,6 +20,6 @@ __all__ = [
     "TemporalEncoderDecoder",
     "Reshape",
     "CastTensor",
-    "CollectTestList"
-
+    "CollectTestList",
+    "GeospatialNeck"
 ]
