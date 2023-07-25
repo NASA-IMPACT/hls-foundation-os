@@ -24,7 +24,7 @@ embed_dim = 768
 num_heads = 12
 tubelet_size = 1
 
-experiment = 'multiclass_six_bands'
+experiment = 'multiclass_six_bands_CE'
 
 work_dir = '/dccstor/geofm-finetuning/hls_cdl_six_bands/experiments/' + experiment
 save_path = work_dir
@@ -181,7 +181,7 @@ loss_weights_multi = [1.5652886 ,  0.46067129,  0.59387921,  0.48431193,  0.6555
         0.83456613]
 
 # loss_func = dict(type='DiceLoss', use_sigmoid=False, loss_weight=1, class_weight=loss_weights_multi)
-loss_func = dict(type="DiceLoss", use_sigmoid=False, class_weight=loss_weights_multi, avg_non_ignore=True)
+loss_func = dict(type="CrossEntropyLoss", use_sigmoid=False, class_weight=loss_weights_multi, avg_non_ignore=True)
 
 
 output_embed_dim = embed_dim*num_frames

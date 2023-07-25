@@ -24,7 +24,7 @@ embed_dim = 768
 num_heads = 12
 tubelet_size = 1
 
-experiment = 'multiclass_six_bands_new_neck_large_CE_no_dropout'
+experiment = 'multiclass_six_bands_new_neck'
 
 work_dir = '/dccstor/geofm-finetuning/hls_cdl_six_bands/experiments/' + experiment
 save_path = work_dir
@@ -233,7 +233,7 @@ model = dict(
         type="FCNHead",
         in_index=-1,
         channels=64,
-        num_convs=2,
+        num_convs=1,
         concat_input=False,
         dropout_ratio=0.1,
         align_corners=False,
