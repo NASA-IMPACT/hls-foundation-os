@@ -26,7 +26,7 @@ We provide a simple architecture in [the configuration file](./configs/config.py
 5. `cd` into the cloned repo
 5. `pip install -e .`
 6. `pip install -U openmim`
-7. `mim install mmcv-full==1.6.2 -f https://download.openmmlab.com/mmcv/dist/{cuda_version}/{torch_version}/index.html`. Check compatibilities here: https://mmcv.readthedocs.io/en/v1.6.2/get_started/installation.html
+7. `mim install mmcv-full==1.6.2 -f https://download.openmmlab.com/mmcv/dist/{cuda_version}/{torch_version}/index.html`. Note that pre-build wheels (fast installs without needing to build) only exist for some versions of torch and CUDA. Check compatibilities here: https://mmcv.readthedocs.io/en/v1.6.2/get_started/installation.html
 
 ### Data
 
