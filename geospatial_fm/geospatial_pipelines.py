@@ -240,10 +240,10 @@ class LoadGeospatialImageFromFile(object):
         nodata (float/int): no data value to substitute to nodata_replace
         nodata_replace (float/int): value to use to replace no data
         channels_first (bool): whether the file has channels_first format.
-            If False, will transpose to channels_first format. Defaults to True.
+            If False, will transpose to channels_first format. Defaults to False.
     """
 
-    def __init__(self, to_float32=False, nodata=None, nodata_replace=0.0, channels_first=True):
+    def __init__(self, to_float32=False, nodata=None, nodata_replace=0.0, channels_first=False):
         self.to_float32 = to_float32
         self.nodata = nodata
         self.nodata_replace = nodata_replace
