@@ -53,7 +53,7 @@ tile_size = 224
 orig_nsize = 512
 crop_size = (tile_size, tile_size)
 train_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=True),
+    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_first=False),
     dict(type='LoadGeospatialAnnotations', reduce_zero_label=True),
     dict(type='RandomFlip', prob=0.5),
     dict(type='ToTensor', keys=['img', 'gt_semantic_seg']),
@@ -65,23 +65,8 @@ train_pipeline = [
     dict(type='Collect', keys=['img', 'gt_semantic_seg']),
 ]
 
-val_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=True),
-    dict(type='LoadGeospatialAnnotations', reduce_zero_label=True),
-    dict(type='ToTensor', keys=['img', 'gt_semantic_seg']),
-    dict(type='TorchNormalize', **img_norm_cfg),
-    dict(type='TorchRandomCrop', crop_size=crop_size),
-    dict(type='Reshape', keys=['img'], new_shape=(len(bands), num_frames, tile_size, tile_size)),
-    dict(type='Reshape', keys=['gt_semantic_seg'], new_shape=(1, tile_size, tile_size)),
-    dict(type='CastTensor', keys=['gt_semantic_seg'], new_type="torch.LongTensor"),
-    dict(type='Collect', keys=['img', 'gt_semantic_seg'],
-         meta_keys=['img_info', 'ann_info', 'seg_fields', 'img_prefix', 'seg_prefix', 'filename', 'ori_filename', 'img',
-                    'img_shape', 'ori_shape', 'pad_shape', 'scale_factor', 'img_norm_cfg', 'gt_semantic_seg']),
-
-]
-
 test_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=True),
+    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_first=False),
     dict(type='ToTensor', keys=['img']),
     dict(type='TorchNormalize', **img_norm_cfg),
     dict(type='Reshape', keys=['img'], new_shape=(len(bands), num_frames, -1, -1), look_up = {'2': 1, '3': 2}),

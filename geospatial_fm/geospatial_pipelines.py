@@ -12,7 +12,8 @@ from torchvision import transforms
 
 
 def open_tiff(fname):
-    return imread(fname)
+    data = imread(fname)
+    return data
 
 
 @PIPELINES.register_module()
@@ -230,7 +231,7 @@ class CollectTestList(object):
 class LoadGeospatialImageFromFile(object):
     """
 
-    It loads a tiff image.
+    It loads a tiff image. Returns in channels first format, according to channels_first argument.
 
     Args:
         to_float32 (bool): Whether to convert the loaded image to a float32
@@ -238,12 +239,15 @@ class LoadGeospatialImageFromFile(object):
             Defaults to False.
         nodata (float/int): no data value to substitute to nodata_replace
         nodata_replace (float/int): value to use to replace no data
+        channels_first (bool): whether the file has channels_first format.
+            If False, will transpose to channels_first format. Defaults to True.
     """
 
-    def __init__(self, to_float32=False, nodata=None, nodata_replace=0.0):
+    def __init__(self, to_float32=False, nodata=None, nodata_replace=0.0, channels_first=True):
         self.to_float32 = to_float32
         self.nodata = nodata
         self.nodata_replace = nodata_replace
+        self.channels_first = channels_first
 
     def __call__(self, results):
         if results.get("img_prefix") is not None:
@@ -251,6 +255,10 @@ class LoadGeospatialImageFromFile(object):
         else:
             filename = results["img_info"]["filename"]
         img = open_tiff(filename)
+        
+        if not self.channels_first:
+            img = np.transpose(img, (2, 0, 1))
+
         if self.to_float32:
             img = img.astype(np.float32)
 

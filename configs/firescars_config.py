@@ -69,6 +69,7 @@ train_pipeline = [
     dict(
         type="LoadGeospatialImageFromFile",
         to_float32=image_to_float32,
+        channels_first=False
     ),
     dict(
         type="LoadGeospatialAnnotations",
@@ -94,6 +95,7 @@ test_pipeline = [
     dict(
         type="LoadGeospatialImageFromFile",
         to_float32=image_to_float32,
+        channels_first=False
     ),
     dict(type="BandsExtract", bands=bands),
     dict(type="ToTensor", keys=["img"]),
