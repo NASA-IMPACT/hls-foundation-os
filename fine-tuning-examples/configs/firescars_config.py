@@ -13,7 +13,7 @@ custom_imports = dict(imports=["geospatial_fm"])
 ### Configs
 
 # Data
-# TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
+# TO BE DEFINED BY USER: Data root to firescar downloaded dataset
 data_root = "<path to firescars root>"
 
 dataset_type = "GeospatialDataset"
