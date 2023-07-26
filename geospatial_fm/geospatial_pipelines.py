@@ -2,22 +2,17 @@
 This file holds pipeline components useful for loading remote sensing images and annotations.
 """
 import os.path as osp
-import torch
 
 import numpy as np
-import rasterio
 import torchvision.transforms.functional as F
 from mmcv.parallel import DataContainer as DC
 from mmseg.datasets.builder import PIPELINES
+from tifffile import imread
 from torchvision import transforms
 
 
 def open_tiff(fname):
-    with rasterio.open(fname, "r") as src:
-        data = src.read()
-
-    return data
-
+    return imread(fname)
 
 
 @PIPELINES.register_module()
@@ -55,12 +50,12 @@ class BandsExtract(object):
     It extracts bands from an image
 
     Args:
-        bands (list, optional): The list of indexes to use for extraction. If not provided nothing will happen. 
+        bands (list, optional): The list of indexes to use for extraction. If not provided nothing will happen.
     """
-    def __init__(self,
-                 bands=None):
+
+    def __init__(self, bands=None):
         self.bands = bands
-    
+
     def __call__(self, results):
         """Call function to multiply extract bands
 
@@ -70,15 +65,13 @@ class BandsExtract(object):
         Returns:
             dict: Results with extracted bands
         """
-        
-        if self.bands is not None:
-            
-            img = results['img']
-            img = img[self.bands, :, :].copy()
-            results['img'] = img        
-        
-        return results
 
+        if self.bands is not None:
+            img = results["img"]
+            img = img[self.bands, :, :].copy()
+            results["img"] = img
+
+        return results
 
 
 @PIPELINES.register_module()
@@ -307,26 +300,22 @@ class LoadGeospatialAnnotations(object):
         reduce_zero_label=False,
         nodata=None,
         nodata_replace=-1,
-        categorical_loop_up=None,
     ):
         self.reduce_zero_label = reduce_zero_label
         self.nodata = nodata
         self.nodata_replace = nodata_replace
 
     def __call__(self, results):
-        
         if results.get("seg_prefix", None) is not None:
             filename = osp.join(results["seg_prefix"], results["ann_info"]["seg_map"])
         else:
             filename = results["ann_info"]["seg_map"]
-            
-        gt_semantic_seg = open_tiff(filename)
 
+        gt_semantic_seg = open_tiff(filename)
         if self.nodata is not None:
             gt_semantic_seg = np.where(
                 gt_semantic_seg == self.nodata, self.nodata_replace, gt_semantic_seg
             )
-
 
         # reduce zero_label
         if self.reduce_zero_label:
@@ -341,9 +330,6 @@ class LoadGeospatialAnnotations(object):
             gt_semantic_seg_copy = gt_semantic_seg.copy()
             for old_id, new_id in results["label_map"].items():
                 gt_semantic_seg[gt_semantic_seg_copy == old_id] = new_id
-
-        # remove dimension
-        gt_semantic_seg = gt_semantic_seg.squeeze(0)
 
         results["gt_semantic_seg"] = gt_semantic_seg
         results["seg_fields"].append("gt_semantic_seg")

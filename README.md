@@ -22,10 +22,11 @@ We provide a simple architecture in [the configuration file](./configs/config.py
 1. Clone this repository
 2. `conda create -n <environment-name> python==3.9`
 3. `conda activate <environment-name>`
-4. Install torch and torchvision: `pip install torch==1.7.1 torchvision==0.8.2` (May vary with your system. Please check at https://pytorch.org/get-started/locally/)
-5. `pip install .`
+4. Install torch (tested for >=1.7.1 and <=11) and torchvision (tested for >=0.8.2 and <=0.12). May vary with your system. Please check at: https://pytorch.org/get-started/previous-versions/
+5. `cd` into the cloned repo
+5. `pip install -e .`
 6. `pip install -U openmim`
-7. `mim install mmcv-full==1.5.0` (This may take a while for torch > 1.7.1, as wheel must be built)
+7. `mim install mmcv-full==1.6.2 -f https://download.openmmlab.com/mmcv/dist/{cuda_version}/{torch_version}/index.html`. Check compatibilities here: https://mmcv.readthedocs.io/en/v1.6.2/get_started/installation.html
 
 ### Data
 
