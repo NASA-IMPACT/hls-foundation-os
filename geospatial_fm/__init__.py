@@ -5,7 +5,8 @@ from .geospatial_pipelines import (
     LoadGeospatialImageFromFile,
     Reshape,
     CastTensor,
-    CollectTestList
+    CollectTestList,
+    TorchPermute
 )
 from .datasets import GeospatialDataset
 from .temporal_encoder_decoder import TemporalEncoderDecoder
@@ -21,5 +22,6 @@ __all__ = [
     "Reshape",
     "CastTensor",
     "CollectTestList",
-    "GeospatialNeck"
+    "GeospatialNeck",
+    "TorchPermute"
 ]

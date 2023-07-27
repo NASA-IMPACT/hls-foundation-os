@@ -17,23 +17,25 @@ img_size = int(os.getenv('IMG_SIZE', 224))
 num_workers = int(os.getenv('DATA_LOADER_NUM_WORKERS', 2))
 
 # model related
-pretrained_weights_path = "/dccstor/geofm-finetuning/pretrain_ckpts/mae_weights/2023-04-29_21-50-47/epoch-725-loss-0.0365.pt"
+# TO BE DEFINED BY USER
+pretrained_weights_path = "<pretrained weight path?"
 num_layers = 12
 patch_size = 16
 embed_dim = 768
 num_heads = 12
 tubelet_size = 1
 
-experiment = 'multiclass_six_bands_new_neck'
-
-work_dir = '/dccstor/geofm-finetuning/hls_cdl_six_bands/experiments/' + experiment
+# TO BE DEFINED BY USER
+experiment = '<experiment name>'
+project_dir = '<project dir>'
+work_dir = os.path.join(project_dir, experiment)
 save_path = work_dir
 
 
 gpu_ids = [0]
 dataset_type = 'GeospatialDataset'
-# dataset_type = 'CustomDataset'
-data_root = '/dccstor/geofm-finetuning/hls_cdl_six_bands/'  # changed data root folder
+# TO BE DEFINED BY USER
+data_root = '<path to data root>'
 
 img_norm_cfg = dict(
     means=[524.299965, 852.201097, 987.414649, 2948.727491, 2712.733024, 1827.229407, 
@@ -53,10 +55,12 @@ tile_size = 224
 orig_nsize = 512
 crop_size = (tile_size, tile_size)
 train_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_first=False),
+    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_last=True),
     dict(type='LoadGeospatialAnnotations', reduce_zero_label=True),
     dict(type='RandomFlip', prob=0.5),
     dict(type='ToTensor', keys=['img', 'gt_semantic_seg']),
+     # to channels first
+    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type='TorchNormalize', **img_norm_cfg),
     dict(type='TorchRandomCrop', crop_size=crop_size),
     dict(type='Reshape', keys=['img'], new_shape=(len(bands), num_frames, tile_size, tile_size)),
@@ -66,8 +70,10 @@ train_pipeline = [
 ]
 
 test_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_first=False),
+    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_last=True),
     dict(type='ToTensor', keys=['img']),
+     # to channels first
+    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type='TorchNormalize', **img_norm_cfg),
     dict(type='Reshape', keys=['img'], new_shape=(len(bands), num_frames, -1, -1), look_up = {'2': 1, '3': 2}),
     dict(type='CastTensor', keys=['img'], new_type="torch.FloatTensor"),
@@ -116,9 +122,7 @@ data = dict(
         img_suffix='_merged.tif',
         seg_map_suffix='.mask.tif',
         split = splits['test']))
-        #gt_seg_map_loader_cfg=dict(nodata=-1, nodata_replace=2)))
 
-# AdamW optimizer, no weight decay for position embedding & layer norm in backbone
 optimizer = dict(type="Adam", lr=1.5e-5, betas=(0.9, 0.999), weight_decay=0.05)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
@@ -153,7 +157,6 @@ optimizer_config = dict(grad_clip=None)
 
 
 runner = dict(type='IterBasedRunner', max_iters=10000)
-# workflow = [('train',1)]  # Workflow for runner. [('train', 1)] means there is only one workflow and the workflow named 'train' is executed once. The workflow trains the model by 40000 iterations according to the `runner.max_iters`.
 # workflow = [('train', 1),('val', 1)]
 workflow = [('train', 1)]
 

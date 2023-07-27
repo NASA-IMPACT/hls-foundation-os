@@ -17,6 +17,13 @@ The pretrained model we work with is a [ViT](https://arxiv.org/abs/2010.11929) t
 ### The architecture
 We provide a simple architecture in [the configuration file](./configs/config.py) that adds a neck and segmentation head to the backbone. The neck concatenates and processes the transformer's token based embeddings into one that can be fed into convolutional layers. The head processes this embedding into a segmentation mask. The code for these can be found in [this file](./geospatial_fm/geospatial_fm.py).
 
+### The pipeline
+We additionally provide extra components for data loading pipelines in [geospatial_pipelines.py](./geospatial_fm/geospatial_pipelines.py). These are documented in the file.
+We observe the MMCV convention that all operations assume channels last format. Our tiff loader also assumes this is the format files are written in, and offers a flag to automatically transpose to channels last format if this is not the case.
+*However*, we also introduce some components with the prefix `Torch`, e.g. `TorchNormalize`. These components assume the torch convention of channels first.
+
+At some point during the pipeline, before feeding the data to the model, it is necessary to change to channels first format.
+We reccomend doing after the `ToTensor` operation (which is also necessary at some point), using the `TorchPermute` operation.
 ## Setup
 ### Dependencies
 1. Clone this repository

@@ -13,7 +13,7 @@ custom_imports = dict(imports=["geospatial_fm"])
 ### Configs
 # Data
 # TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
-data_root = "<path to sen1floods11 root>"
+data_root = "<path to data root>"
 
 dataset_type = "GeospatialDataset"
 num_classes=3
@@ -59,12 +59,12 @@ num_heads = 12
 tubelet_size = 1
 
 # TRAINING
-epochs=50
+epochs=100
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
 experiment = "<experiment name>"
-project_dir = "<project directory>"
+project_dir = "<project dir>"
 work_dir = os.path.join(project_dir, experiment)
 save_path = work_dir
 
@@ -75,7 +75,7 @@ train_pipeline = [
         to_float32=False,
         nodata=image_nodata,
         nodata_replace=image_nodata_replace,
-        channels_first=True
+        channels_last=False
     ),
     dict(
         type="LoadGeospatialAnnotations",
@@ -87,6 +87,8 @@ train_pipeline = [
     dict(type="ConstantMultiply", constant=constant),
     dict(type="RandomFlip", prob=0.5),
     dict(type="ToTensor", keys=["img", "gt_semantic_seg"]),
+    # to channels first
+    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type="TorchNormalize", **img_norm_cfg),
     dict(type="TorchRandomCrop", crop_size=crop_size),
     dict(
@@ -106,11 +108,13 @@ test_pipeline = [
         to_float32=False,
         nodata=image_nodata,
         nodata_replace=image_nodata_replace,
-        channels_first=True
+        channels_last=False
     ),
     dict(type="BandsExtract", bands=bands),
     dict(type="ConstantMultiply", constant=constant),
     dict(type="ToTensor", keys=["img"]),
+    # to channels first
+    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type="TorchNormalize", **img_norm_cfg),
     dict(
         type="Reshape",

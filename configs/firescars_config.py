@@ -13,7 +13,7 @@ custom_imports = dict(imports=["geospatial_fm"])
 ### Configs
 
 # Data
-# TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
+# TO BE DEFINED BY USER: Data root to firescars downloaded dataset
 data_root = "<path to firescars root>"
 
 dataset_type = "GeospatialDataset"
@@ -66,65 +66,65 @@ save_path = work_dir
 
 # Pipelines
 train_pipeline = [
+    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_last=True),
+    dict(type='LoadGeospatialAnnotations', reduce_zero_label=False),
+    dict(type='BandsExtract', bands=[0, 1, 2, 3, 4, 5]),
+    dict(type='RandomFlip', prob=0.5),
+    dict(type='ToTensor', keys=['img', 'gt_semantic_seg']),
+    # to channels first
+    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(
-        type="LoadGeospatialImageFromFile",
-        to_float32=image_to_float32,
-        channels_first=False
-    ),
-    dict(
-        type="LoadGeospatialAnnotations",
-        reduce_zero_label=False
-    ),
-    dict(type="BandsExtract", bands=bands),
-    dict(type="RandomFlip", prob=0.5),
-    dict(type="ToTensor", keys=["img", "gt_semantic_seg"]),
-    dict(type="TorchNormalize", **img_norm_cfg),
-    dict(type="TorchRandomCrop", crop_size=crop_size),
-    dict(
-        type="Reshape",
-        keys=["img"],
-        new_shape=(len(bands), num_frames, tile_size, tile_size),
-    ),
-    dict(type="Reshape", keys=["gt_semantic_seg"], new_shape=(1, tile_size, tile_size)),
-    dict(type="CastTensor", keys=["gt_semantic_seg"], new_type="torch.LongTensor"),
-    dict(type="Collect", keys=["img", "gt_semantic_seg"]),
-]
-
-
-test_pipeline = [
-    dict(
-        type="LoadGeospatialImageFromFile",
-        to_float32=image_to_float32,
-        channels_first=False
-    ),
-    dict(type="BandsExtract", bands=bands),
-    dict(type="ToTensor", keys=["img"]),
-    dict(type="TorchNormalize", **img_norm_cfg),
-    dict(
-        type="Reshape",
-        keys=["img"],
-        new_shape=(len(bands), num_frames, -1, -1),
-        look_up={'2': 1, '3': 2}
-    ),
-    dict(type="CastTensor", keys=["img"], new_type="torch.FloatTensor"),
-    dict(
-        type="CollectTestList",
-        keys=["img"],
-        meta_keys=[
-            "img_info",
-            "seg_fields",
-            "img_prefix",
-            "seg_prefix",
-            "filename",
-            "ori_filename",
-            "img",
-            "img_shape",
-            "ori_shape",
-            "pad_shape",
-            "scale_factor",
-            "img_norm_cfg",
+        type='TorchNormalize',
+        means=[
+            0.033349706741586264, 0.05701185520536176, 0.05889748132001316,
+            0.2323245113436119, 0.1972854853760658, 0.11944914225186566
         ],
-    ),
+        stds=[
+            0.02269135568823774, 0.026807560223070237, 0.04004109844362779,
+            0.07791732423672691, 0.08708738838140137, 0.07241979477437814
+        ]),
+    dict(type='TorchRandomCrop', crop_size=(224, 224)),
+    dict(type='Reshape', keys=['img'], new_shape=(6, 1, 224, 224)),
+    dict(type='Reshape', keys=['gt_semantic_seg'], new_shape=(1, 224, 224)),
+    dict(
+        type='CastTensor',
+        keys=['gt_semantic_seg'],
+        new_type='torch.LongTensor'),
+    dict(type='Collect', keys=['img', 'gt_semantic_seg'])
+]
+test_pipeline = [
+    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_last=True),
+    dict(type='BandsExtract', bands=[0, 1, 2, 3, 4, 5]),
+    dict(type='ToTensor', keys=['img']),
+    # to channels first
+    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
+    dict(
+        type='TorchNormalize',
+        means=[
+            0.033349706741586264, 0.05701185520536176, 0.05889748132001316,
+            0.2323245113436119, 0.1972854853760658, 0.11944914225186566
+        ],
+        stds=[
+            0.02269135568823774, 0.026807560223070237, 0.04004109844362779,
+            0.07791732423672691, 0.08708738838140137, 0.07241979477437814
+        ]),
+    dict(
+        type='Reshape',
+        keys=['img'],
+        new_shape=(6, 1, -1, -1),
+        look_up=dict({
+            '2': 1,
+            '3': 2
+        })),
+    dict(type='CastTensor', keys=['img'], new_type='torch.FloatTensor'),
+    dict(
+        type='CollectTestList',
+        keys=['img'],
+        meta_keys=[
+            'img_info', 'seg_fields', 'img_prefix', 'seg_prefix', 'filename',
+            'ori_filename', 'img', 'img_shape', 'ori_shape', 'pad_shape',
+            'scale_factor', 'img_norm_cfg'
+        ])
 ]
 
 # Dataset
