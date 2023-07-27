@@ -13,15 +13,15 @@ custom_imports = dict(imports=["geospatial_fm"])
 ### Configs
 # Data
 # TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
-data_root = "<path to data root>"
+data_root = "<path to dataset>"
 
 dataset_type = "GeospatialDataset"
-num_classes=3
+num_classes=2
 num_frames = 1
 img_size = 224
 num_workers = 2
 samples_per_gpu = 4
-CLASSES=(0,1,2)
+CLASSES=(0,1)
 
 img_norm_cfg = dict(means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526,0.12046503],
                     stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221 , 0.06834774, 0.05294205])
@@ -170,6 +170,7 @@ data = dict(
         pipeline=test_pipeline,
         ignore_index=ignore_index,
         split=splits["val"],
+        gt_seg_map_loader_cfg=dict(nodata=label_nodata, nodata_replace=ignore_index)
     ),
     test=dict(
         type=dataset_type,
@@ -220,7 +221,7 @@ workflow = [("train", 1),("val", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
 
-ce_weights = [0.3, 0.7, 0]
+ce_weights = [0.3, 0.7]
 
 model = dict(
     type="TemporalEncoderDecoder",
@@ -252,6 +253,7 @@ model = dict(
         in_channels=embed_dim,
         type="FCNHead",
         in_index=-1,
+        ignore_index=ignore_index,
         channels=256,
         num_convs=1,
         concat_input=False,
@@ -268,6 +270,7 @@ model = dict(
     auxiliary_head=dict(
         num_classes=num_classes,
         in_channels=embed_dim,
+        ignore_index=ignore_index,
         type="FCNHead",
         in_index=-1,
         channels=256,
