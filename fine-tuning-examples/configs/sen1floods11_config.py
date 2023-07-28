@@ -1,8 +1,8 @@
 import os
 
 # base options
-dist_params = dict(backend='nccl')
-log_level = 'INFO'
+dist_params = dict(backend="nccl")
+log_level = "INFO"
 load_from = None
 resume_from = None
 cudnn_benchmark = True
@@ -16,15 +16,17 @@ custom_imports = dict(imports=["geospatial_fm"])
 data_root = "<path to sen1floods11 root>"
 
 dataset_type = "GeospatialDataset"
-num_classes=3
+num_classes = 3
 num_frames = 1
 img_size = 224
 num_workers = 2
 samples_per_gpu = 4
-CLASSES=(0,1,2)
+CLASSES = (0, 1, 2)
 
-img_norm_cfg = dict(means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526,0.12046503],
-                    stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221 , 0.06834774, 0.05294205])
+img_norm_cfg = dict(
+    means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526, 0.12046503],
+    stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221, 0.06834774, 0.05294205],
+)
 
 bands = [1, 2, 3, 8, 11, 12]
 tile_size = img_size
@@ -59,7 +61,7 @@ num_heads = 12
 tubelet_size = 1
 
 # TRAINING
-epochs=50
+epochs = 50
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
@@ -114,7 +116,7 @@ test_pipeline = [
         type="Reshape",
         keys=["img"],
         new_shape=(len(bands), num_frames, -1, -1),
-        look_up={'2': 1, '3': 2}
+        look_up={"2": 1, "3": 2},
     ),
     dict(type="CastTensor", keys=["img"], new_type="torch.FloatTensor"),
     dict(
@@ -196,21 +198,24 @@ lr_config = dict(
 log_config = dict(
     interval=10,
     hooks=[
-        dict(type='TextLoggerHook', by_epoch=True),
-        dict(type='TensorboardLoggerHook', by_epoch=True),
-    ])
-
-checkpoint_config = dict(
-    by_epoch=True, interval=10, out_dir=save_path 
+        dict(type="TextLoggerHook", by_epoch=True),
+        dict(type="TensorboardLoggerHook", by_epoch=True),
+    ],
 )
 
+checkpoint_config = dict(by_epoch=True, interval=10, out_dir=save_path)
+
 evaluation = dict(
-    interval=eval_epoch_interval, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
+    interval=eval_epoch_interval,
+    metric="mIoU",
+    pre_eval=True,
+    save_best="mIoU",
+    by_epoch=True,
 )
 
 runner = dict(type="EpochBasedRunner", max_epochs=epochs)
 
-workflow = [("train", 1),("val", 1)]
+workflow = [("train", 1), ("val", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
 
@@ -235,7 +240,7 @@ model = dict(
     ),
     neck=dict(
         type="ConvTransformerTokensToEmbeddingNeck",
-        embed_dim=num_frames*embed_dim,
+        embed_dim=num_frames * embed_dim,
         output_embed_dim=embed_dim,
         drop_cls_token=True,
         Hp=img_size // patch_size,
@@ -278,5 +283,9 @@ model = dict(
         ),
     ),
     train_cfg=dict(),
-    test_cfg=dict(mode="slide", stride=(int(tile_size/2), int(tile_size/2)), crop_size=(tile_size, tile_size)),
+    test_cfg=dict(
+        mode="slide",
+        stride=(int(tile_size / 2), int(tile_size / 2)),
+        crop_size=(tile_size, tile_size),
+    ),
 )
