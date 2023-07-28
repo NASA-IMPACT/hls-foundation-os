@@ -286,7 +286,7 @@ loss_weights_multi = [
 
 # loss_func = dict(type='DiceLoss', use_sigmoid=False, loss_weight=1, class_weight=loss_weights_multi)
 loss_func = dict(
-    type="CrossEntropyLoss",
+    type="DiceLoss",
     use_sigmoid=False,
     class_weight=loss_weights_multi,
     avg_non_ignore=True,
