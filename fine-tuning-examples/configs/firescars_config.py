@@ -1,8 +1,8 @@
 import os
 
 # base options
-dist_params = dict(backend='nccl')
-log_level = 'INFO'
+dist_params = dict(backend="nccl")
+log_level = "INFO"
 load_from = None
 resume_from = None
 cudnn_benchmark = True
@@ -17,18 +17,31 @@ custom_imports = dict(imports=["geospatial_fm"])
 data_root = "<path to firescars root>"
 
 dataset_type = "GeospatialDataset"
-num_classes=2
+num_classes = 2
 num_frames = 1
 img_size = 224
 num_workers = 4
 samples_per_gpu = 4
-CLASSES=(0,1)
+CLASSES = (0, 1)
 
 img_norm_cfg = dict(
-    means=[0.033349706741586264, 0.05701185520536176, 0.05889748132001316, 0.2323245113436119,
-           0.1972854853760658, 0.11944914225186566],
-    stds=[0.02269135568823774, 0.026807560223070237, 0.04004109844362779, 0.07791732423672691,
-          0.08708738838140137, 0.07241979477437814])  ## change the mean and std of all the bands
+    means=[
+        0.033349706741586264,
+        0.05701185520536176,
+        0.05889748132001316,
+        0.2323245113436119,
+        0.1972854853760658,
+        0.11944914225186566,
+    ],
+    stds=[
+        0.02269135568823774,
+        0.026807560223070237,
+        0.04004109844362779,
+        0.07791732423672691,
+        0.08708738838140137,
+        0.07241979477437814,
+    ],
+)  ## change the mean and std of all the bands
 
 bands = [0, 1, 2, 3, 4, 5]
 
@@ -55,7 +68,7 @@ num_heads = 12
 tubelet_size = 1
 
 # TRAINING
-epochs=50
+epochs = 50
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
@@ -70,10 +83,7 @@ train_pipeline = [
         type="LoadGeospatialImageFromFile",
         to_float32=image_to_float32,
     ),
-    dict(
-        type="LoadGeospatialAnnotations",
-        reduce_zero_label=False
-    ),
+    dict(type="LoadGeospatialAnnotations", reduce_zero_label=False),
     dict(type="BandsExtract", bands=bands),
     dict(type="RandomFlip", prob=0.5),
     dict(type="ToTensor", keys=["img", "gt_semantic_seg"]),
@@ -102,7 +112,7 @@ test_pipeline = [
         type="Reshape",
         keys=["img"],
         new_shape=(len(bands), num_frames, -1, -1),
-        look_up={'2': 1, '3': 2}
+        look_up={"2": 1, "3": 2},
     ),
     dict(type="CastTensor", keys=["img"], new_type="torch.FloatTensor"),
     dict(
@@ -133,8 +143,8 @@ data = dict(
         type=dataset_type,
         CLASSES=CLASSES,
         data_root=data_root,
-        img_dir='training',
-        ann_dir='training',
+        img_dir="training",
+        ann_dir="training",
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=train_pipeline,
@@ -144,8 +154,8 @@ data = dict(
         type=dataset_type,
         CLASSES=CLASSES,
         data_root=data_root,
-        img_dir='validation',
-        ann_dir='validation',
+        img_dir="validation",
+        ann_dir="validation",
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=test_pipeline,
@@ -155,17 +165,17 @@ data = dict(
         type=dataset_type,
         CLASSES=CLASSES,
         data_root=data_root,
-        img_dir='validation',
-        ann_dir='validation',
+        img_dir="validation",
+        ann_dir="validation",
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=test_pipeline,
-        ignore_index=ignore_index
+        ignore_index=ignore_index,
     ),
 )
 
 # Training
-optimizer = dict(type="Adam", lr=1.5e-5, betas=(0.9, 0.999),  weight_decay=0.05)
+optimizer = dict(type="Adam", lr=1.5e-5, betas=(0.9, 0.999), weight_decay=0.05)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy="poly",
@@ -180,12 +190,15 @@ lr_config = dict(
 log_config = dict(
     interval=20,
     hooks=[
-        dict(type='TextLoggerHook', by_epoch=False),
-        dict(type='TensorboardLoggerHook', by_epoch=False),
-    ])
+        dict(type="TextLoggerHook", by_epoch=False),
+        dict(type="TensorboardLoggerHook", by_epoch=False),
+    ],
+)
 
 checkpoint_config = dict(
-    by_epoch=True, interval=10, out_dir=save_path, 
+    by_epoch=True,
+    interval=10,
+    out_dir=save_path,
 )
 
 evaluation = dict(
@@ -193,7 +206,7 @@ evaluation = dict(
 )
 
 # runner = dict(type="EpochBasedRunner", max_epochs=epochs)
-runner = dict(type='IterBasedRunner', max_iters=6300)
+runner = dict(type="IterBasedRunner", max_iters=6300)
 workflow = [("train", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
@@ -217,7 +230,7 @@ model = dict(
     ),
     neck=dict(
         type="ConvTransformerTokensToEmbeddingNeck",
-        embed_dim=num_frames*embed_dim,
+        embed_dim=num_frames * embed_dim,
         output_embed_dim=embed_dim,
         drop_cls_token=True,
         Hp=img_size // patch_size,
@@ -235,7 +248,8 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='DiceLoss', use_sigmoid=False, loss_weight=1, ignore_index=ignore_index),
+            type="DiceLoss", use_sigmoid=False, loss_weight=1, ignore_index=ignore_index
+        ),
     ),
     auxiliary_head=dict(
         num_classes=num_classes,
@@ -248,8 +262,14 @@ model = dict(
         dropout_ratio=0.1,
         norm_cfg=norm_cfg,
         align_corners=False,
-        loss_decode=dict(type='DiceLoss', use_sigmoid=False, loss_weight=1, ignore_index=ignore_index),
+        loss_decode=dict(
+            type="DiceLoss", use_sigmoid=False, loss_weight=1, ignore_index=ignore_index
+        ),
     ),
     train_cfg=dict(),
-    test_cfg=dict(mode="slide", stride=(int(tile_size/2), int(tile_size/2)), crop_size=(tile_size, tile_size)),
+    test_cfg=dict(
+        mode="slide",
+        stride=(int(tile_size / 2), int(tile_size / 2)),
+        crop_size=(tile_size, tile_size),
+    ),
 )
