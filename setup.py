@@ -14,7 +14,7 @@ setup(
         "tifffile",
         "einops",
         "timm==0.4.12",
-        "tensorboard"
+        "tensorboard",
         "imagecodecs"
     ]
 )
