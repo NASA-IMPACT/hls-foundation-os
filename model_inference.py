@@ -124,15 +124,15 @@ def inference_on_file(model, target_image, output_image, custom_test_pipeline):
         print('Running inference...')
         result = inference_segmentor(model, target_image, custom_test_pipeline)
         print("Output has shape: " + str(result[0].shape))
-        
+
         ##### get metadata mask
         mask = open_tiff(target_image)
         meta = get_meta(target_image)
         mask = np.where(mask == meta['nodata'], 1, 0)
         mask = np.max(mask, axis=0)[None]
-        
+
         result[0] = np.where(mask == 1, -1, result[0])
-        
+
         ##### Save file to disk
         meta["count"] = 1
         meta["dtype"] = "int16"
@@ -192,7 +192,7 @@ def inference_on_files(config_path, ckpt, input_type, input_path, output_path, b
     for i, target_image in enumerate(target_images):
         
         print(f'Working on Image {i}')
-        output_image = output_path+target_image.split("/")[-1].split(".")[0]+'_pred.'+input_type
+        output_image = output_path+target_image.split("/")[-1].replace('.' + input_type, '_pred.'+input_type)
         
         inference_on_file(model, target_image, output_image, custom_test_pipeline)
 
