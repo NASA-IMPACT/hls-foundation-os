@@ -9,15 +9,16 @@
 # DeiT: https://github.com/facebookresearch/deit
 # --------------------------------------------------------
 
-from typing import List
 import numpy as np
 import torch
 import torch.nn as nn
+
 from einops import rearrange
 from mmcv.runner import load_checkpoint
 from mmseg.models.builder import BACKBONES, NECKS
 from timm.models.layers import to_2tuple
 from timm.models.vision_transformer import Block
+from typing import List
 
 
 def _convTranspose2dOutput(
@@ -184,7 +185,6 @@ class ConvTransformerTokensToEmbeddingNeck(nn.Module):
         Hp: int = 14,
         Wp: int = 14,
         drop_cls_token: bool = True,
-        
     ):
         """
 
@@ -299,7 +299,7 @@ class TemporalViTEncoder(nn.Module):
         mlp_ratio: float = 4.0,
         norm_layer: nn.Module = nn.LayerNorm,
         norm_pix_loss: bool = False,
-        pretrained: str = None
+        pretrained: str = None,
     ):
         """
 
@@ -372,7 +372,6 @@ class TemporalViTEncoder(nn.Module):
             # # initialize nn.Linear and nn.LayerNorm
             self.apply(self._init_weights)
 
-
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
             # we use xavier_uniform following official JAX ViT:
@@ -382,7 +381,6 @@ class TemporalViTEncoder(nn.Module):
         elif isinstance(m, nn.LayerNorm):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
-
 
     def forward(self, x):
         # embed patches
