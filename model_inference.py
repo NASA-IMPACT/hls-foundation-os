@@ -174,7 +174,9 @@ def process_test_pipeline(custom_test_pipeline, bands=None):
 def inference_on_files(config_path, ckpt, input_type, input_path, output_path, bands):
     
     # load model
-    model = init_segmentor(config_path, ckpt)
+    config = Config.fromfile(config_path)
+    config.model.backbone.pretrained=None
+    model = init_segmentor(config, ckpt)
     
     # identify images to predict on
     target_images = glob.glob(input_path+"*."+input_type)
