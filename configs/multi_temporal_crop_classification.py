@@ -1,3 +1,4 @@
+import os 
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None
