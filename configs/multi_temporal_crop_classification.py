@@ -228,5 +228,5 @@ model = dict(
         align_corners=False,
         loss_decode=loss_func),
     train_cfg=dict(),
-    test_cfg=dict(mode='slide', stride=(tile_size/2, tile_size/2), crop_size=(tile_size, tile_size)))
+    test_cfg=dict(mode='slide', stride=(int(tile_size/2), int(tile_size/2)), crop_size=(tile_size, tile_size)))
 auto_resume = False
