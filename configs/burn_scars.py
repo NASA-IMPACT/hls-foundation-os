@@ -48,6 +48,7 @@ output_embed_dim = num_frames*embed_dim
 max_intervals=10000
 evaluation_interval=1000
 
+# TO BE DEFINED BY USER: model path
 experiment = '<experiment name>'
 project_dir = '<project directory name>'
 work_dir = os.path.join(project_dir, experiment)
