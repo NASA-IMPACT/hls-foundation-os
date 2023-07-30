@@ -65,6 +65,9 @@ Download the [NASA HLS multi-temporal crop classification dataset](https://huggi
     
     `mim test mmsegmentation configs/multi_temporal_crop_classification.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"`
 
+## Checkpoints on Hugging Face
+We also provide checkpoints on Hugging Face for the [burn scars detection](https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M-burn-scar) and the [multi temporal crop classification tasks](https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M-multi-temporal-crop-classification).
+
 ## Running the inference
 We provide a script to run inference on new data in geotiff format. The data can be of any shape (e.g. height and width) as long as it follows the bands/channels of the original dataset. Below an example:
 
