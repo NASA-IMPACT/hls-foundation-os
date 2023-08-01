@@ -1,7 +1,6 @@
 import os
 
 # base options
-
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None
@@ -17,12 +16,11 @@ custom_imports = dict(imports=["geospatial_fm"])
 data_root = "<path to root directory of burn scars dataset>"
 
 dataset_type = "GeospatialDataset"
-num_classes = 2
+num_classes=2
 num_frames = 1
 img_size = 224
 num_workers = 2
 samples_per_gpu = 4
-
 CLASSES=(0,1)
 
 img_norm_cfg = dict(means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526,0.12046503],
@@ -60,13 +58,13 @@ embed_dim = 768
 num_heads = 12
 tubelet_size = 1
 
-
+# TRAINING
 epochs=100
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
 experiment = "<experiment name>"
-project_dir = "<project directory>"
+project_dir = "<project dir>"
 work_dir = os.path.join(project_dir, experiment)
 save_path = work_dir
 
@@ -205,28 +203,25 @@ lr_config = dict(
 log_config = dict(
     interval=10,
     hooks=[
-        dict(type="TextLoggerHook", by_epoch=True),
-        dict(type="TensorboardLoggerHook", by_epoch=True),
-    ],
+        dict(type='TextLoggerHook', by_epoch=True),
+        dict(type='TensorboardLoggerHook', by_epoch=True),
+    ])
+
+checkpoint_config = dict(
+    by_epoch=True, interval=10, out_dir=save_path 
 )
 
-checkpoint_config = dict(by_epoch=True, interval=10, out_dir=save_path)
-
 evaluation = dict(
-    interval=eval_epoch_interval,
-    metric="mIoU",
-    pre_eval=True,
-    save_best="mIoU",
-    by_epoch=True,
+    interval=eval_epoch_interval, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
 )
 
 runner = dict(type="EpochBasedRunner", max_epochs=epochs)
 
-workflow = [("train", 1), ("val", 1)]
+workflow = [("train", 1),("val", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
 
-ce_weights = [0.3, 0.7, 0]
+ce_weights = [0.3, 0.7]
 
 model = dict(
     type="TemporalEncoderDecoder",
@@ -247,7 +242,7 @@ model = dict(
     ),
     neck=dict(
         type="ConvTransformerTokensToEmbeddingNeck",
-        embed_dim=num_frames * embed_dim,
+        embed_dim=num_frames*embed_dim,
         output_embed_dim=embed_dim,
         drop_cls_token=True,
         Hp=img_size // patch_size,
@@ -292,9 +287,5 @@ model = dict(
         ),
     ),
     train_cfg=dict(),
-    test_cfg=dict(
-        mode="slide",
-        stride=(int(tile_size / 2), int(tile_size / 2)),
-        crop_size=(tile_size, tile_size),
-    ),
+    test_cfg=dict(mode="slide", stride=(int(tile_size/2), int(tile_size/2)), crop_size=(tile_size, tile_size)),
 )

@@ -9,6 +9,7 @@
 # DeiT: https://github.com/facebookresearch/deit
 # --------------------------------------------------------
 
+from typing import List
 import numpy as np
 import torch
 import torch.nn as nn
@@ -17,7 +18,6 @@ from mmcv.runner import load_checkpoint
 from mmseg.models.builder import BACKBONES, NECKS
 from timm.models.layers import to_2tuple
 from timm.models.vision_transformer import Block
-from typing import List
 
 
 def _convTranspose2dOutput(
@@ -269,7 +269,6 @@ class GeospatialNeck(nn.Module):
         out = tuple([x])
 
         return out
-
 @NECKS.register_module()
 class ConvTransformerTokensToEmbeddingNeck(nn.Module):
     """
@@ -285,6 +284,7 @@ class ConvTransformerTokensToEmbeddingNeck(nn.Module):
         Hp: int = 14,
         Wp: int = 14,
         drop_cls_token: bool = True,
+        
     ):
         """
 
@@ -482,6 +482,7 @@ class TemporalViTEncoder(nn.Module):
         elif isinstance(m, nn.LayerNorm):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
+
 
     def forward(self, x):
         # embed patches

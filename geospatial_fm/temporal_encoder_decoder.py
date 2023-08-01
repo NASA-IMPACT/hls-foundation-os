@@ -69,7 +69,8 @@ class TemporalEncoderDecoder(EncoderDecoder):
             mode='bilinear',
             align_corners=self.align_corners)
         return out
-      
+
+
     def slide_inference(self, img, img_meta, rescale):
         """Inference by sliding-window with overlap.
 
@@ -85,6 +86,7 @@ class TemporalEncoderDecoder(EncoderDecoder):
         batch_size = img_size[0]
         h_img = img_size[-2]
         w_img = img_size[-1]
+        
         out_channels = self.out_channels
         h_grids = max(h_img - h_crop + h_stride - 1, 0) // h_stride + 1
         w_grids = max(w_img - w_crop + w_stride - 1, 0) // w_stride + 1
@@ -99,6 +101,7 @@ class TemporalEncoderDecoder(EncoderDecoder):
                 y1 = max(y2 - h_crop, 0)
                 x1 = max(x2 - w_crop, 0)
                 
+
                 if len(img_size) == 4:
                     
                     crop_img = img[:, :, y1:y2, x1:x2]
@@ -185,17 +188,16 @@ class TemporalEncoderDecoder(EncoderDecoder):
             output = F.sigmoid(seg_logit)
         else:
             output = F.softmax(seg_logit, dim=1)
-
-        flip = (
-            img_meta[0]["flip"] if "flip" in img_meta[0] else False
-        )  ##### if flip key is not there d not apply it
+            
+        flip = img_meta[0]['flip'] if 'flip' in img_meta[0] else False ##### if flip key is not there d not apply it
         if flip:
-            flip_direction = img_meta[0]["flip_direction"]
-            assert flip_direction in ["horizontal", "vertical"]
-            if flip_direction == "horizontal":
-                output = output.flip(dims=(3,))
-            elif flip_direction == "vertical":
-                output = output.flip(dims=(2,))
+            flip_direction = img_meta[0]['flip_direction']
+            assert flip_direction in ['horizontal', 'vertical']
+            if flip_direction == 'horizontal':
+                output = output.flip(dims=(3, ))
+            elif flip_direction == 'vertical':
+                output = output.flip(dims=(2, ))
+
         return output
 
     def simple_test(self, img, img_meta, rescale=True):
