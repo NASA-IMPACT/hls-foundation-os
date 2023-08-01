@@ -128,11 +128,11 @@ class TemporalEncoderDecoder(EncoderDecoder):
         if rescale:
             # remove padding area
             #### size over last two dimensions ###
-            resize_shape = img_meta[0]['img_shape'][-2:]
+            resize_shape = img_meta[0]['img_shape'][:2]
             preds = preds[:, :, :resize_shape[0], :resize_shape[1]]
             preds = resize(
                 preds,
-                size=img_meta[0]['ori_shape'][-2:], #### size over last two dimensions ###
+                size=img_meta[0]['ori_shape'][:2],
                 mode='bilinear',
                 align_corners=self.align_corners,
                 warning=False)
@@ -145,13 +145,12 @@ class TemporalEncoderDecoder(EncoderDecoder):
         if rescale:
             # support dynamic shape for onnx
             if torch.onnx.is_in_onnx_export():
-                #### size calculated over last two dimensions ###
                 size = img.shape[-2:]
             else:
                 # remove padding area
-                resize_shape = img_meta[0]['img_shape'][-2:] #### size calculated over last two dimensions ###
+                resize_shape = img_meta[0]['img_shape'][:2] 
                 seg_logit = seg_logit[:, :, :resize_shape[0], :resize_shape[1]]
-                size = img_meta[0]['ori_shape'][-2:] #### size calculated over last two dimensions ###
+                size = img_meta[0]['ori_shape'][:2]
             seg_logit = resize(
                 seg_logit,
                 size=size,
