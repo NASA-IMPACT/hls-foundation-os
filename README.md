@@ -84,7 +84,7 @@ This project builds on [MMSegmentation](https://mmsegmentation.readthedocs.io/en
 
 ## Citation
 
-If this repository helped your research, please cite `hls-foundation-os` in your publications. Here is an example BibTeX entry:
+If this repository helped your research, please cite `HLS foundation` in your publications. Here is an example BibTeX entry:
 
 ```
 @software{HLS_Foundation_2023,
