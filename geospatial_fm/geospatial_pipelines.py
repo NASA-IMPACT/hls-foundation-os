@@ -1,13 +1,15 @@
 """
 This file holds pipeline components useful for loading remote sensing images and annotations.
 """
-import os.path as osp
-
 import numpy as np
+import os.path as osp
+import rasterio
+import torch
 import torchvision.transforms.functional as F
+
+from tifffile import imread
 from mmcv.parallel import DataContainer as DC
 from mmseg.datasets.builder import PIPELINES
-from tifffile import imread
 from torchvision import transforms
 
 
@@ -46,6 +48,7 @@ class ConstantMultiply(object):
 
 @PIPELINES.register_module()
 class BandsExtract(object):
+
     """Extract bands from image. Assumes channels last
 
     It extracts bands from an image. Assumes channels last.
@@ -120,7 +123,6 @@ class TorchNormalize(object):
             dict: Normalized results, 'img_norm_cfg' key is added into
                 result dict.
         """
-
         results["img"] = F.normalize(results["img"], self.means, self.stds, False)
         results["img_norm_cfg"] = dict(mean=self.means, std=self.stds)
         return results
@@ -346,6 +348,7 @@ class LoadGeospatialAnnotations(object):
             filename = results["ann_info"]["seg_map"]
 
         gt_semantic_seg = open_tiff(filename)
+
         if self.nodata is not None:
             gt_semantic_seg = np.where(
                 gt_semantic_seg == self.nodata, self.nodata_replace, gt_semantic_seg

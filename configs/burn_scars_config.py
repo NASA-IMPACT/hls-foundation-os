@@ -1,9 +1,8 @@
 import os
 
 # base options
-
-dist_params = dict(backend='nccl')
-log_level = 'INFO'
+dist_params = dict(backend="nccl")
+log_level = "INFO"
 load_from = None
 resume_from = None
 cudnn_benchmark = True
@@ -12,44 +11,52 @@ custom_imports = dict(imports=["geospatial_fm"])
 
 
 ### Configs
+
 # Data
-# TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
-data_root = "<path to root directory of burn scars dataset>"
+# TO BE DEFINED BY USER: Data root to firescar downloaded dataset
+data_root = "<path to firescars root>"
 
 dataset_type = "GeospatialDataset"
 num_classes = 2
 num_frames = 1
 img_size = 224
-num_workers = 2
+num_workers = 4
 samples_per_gpu = 4
+CLASSES = (0, 1)
 
-CLASSES=(0,1)
+img_norm_cfg = dict(
+    means=[
+        0.033349706741586264,
+        0.05701185520536176,
+        0.05889748132001316,
+        0.2323245113436119,
+        0.1972854853760658,
+        0.11944914225186566,
+    ],
+    stds=[
+        0.02269135568823774,
+        0.026807560223070237,
+        0.04004109844362779,
+        0.07791732423672691,
+        0.08708738838140137,
+        0.07241979477437814,
+    ],
+)  ## change the mean and std of all the bands
 
-img_norm_cfg = dict(means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526,0.12046503],
-                    stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221 , 0.06834774, 0.05294205])
+bands = [0, 1, 2, 3, 4, 5]
 
-bands = [1, 2, 3, 8, 11, 12]
 tile_size = img_size
 orig_nsize = 512
 crop_size = (tile_size, tile_size)
 
-img_dir = data_root + "v1.1/data/flood_events/HandLabeled/S2Hand"
-ann_dir = data_root + "v1.1/data/flood_events/HandLabeled/LabelHand"
-img_suffix = f"_S2Hand.tif"
-seg_map_suffix = f"_LabelHand.tif"
+img_suffix = "_merged.tif"
+seg_map_suffix = ".mask.tif"
 
-splits = {
-    "train": "data_splits/train_split.txt",
-    "val": "data_splits/val_split.txt",
-    "test": "data_splits/test_split.txt",
-}
-splits = {k: os.path.abspath(v) for (k, v) in splits.items()}
 
-ignore_index = 2
-label_nodata = -1
+ignore_index = -1
 image_nodata = -9999
 image_nodata_replace = 0
-constant = 0.0001
+image_to_float32 = True
 
 # Model
 # TO BE DEFINED BY USER: path to pretrained backbone weights
@@ -60,8 +67,8 @@ embed_dim = 768
 num_heads = 12
 tubelet_size = 1
 
-
-epochs=100
+# TRAINING
+epochs = 50
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
@@ -74,23 +81,12 @@ save_path = work_dir
 train_pipeline = [
     dict(
         type="LoadGeospatialImageFromFile",
-        to_float32=False,
-        nodata=image_nodata,
-        nodata_replace=image_nodata_replace,
-        channels_last=False
+        to_float32=image_to_float32,
     ),
-    dict(
-        type="LoadGeospatialAnnotations",
-        reduce_zero_label=False,
-        nodata=label_nodata,
-        nodata_replace=ignore_index,
-    ),
+    dict(type="LoadGeospatialAnnotations", reduce_zero_label=False),
     dict(type="BandsExtract", bands=bands),
-    dict(type="ConstantMultiply", constant=constant),
     dict(type="RandomFlip", prob=0.5),
     dict(type="ToTensor", keys=["img", "gt_semantic_seg"]),
-    # to channels first
-    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type="TorchNormalize", **img_norm_cfg),
     dict(type="TorchRandomCrop", crop_size=crop_size),
     dict(
@@ -107,22 +103,16 @@ train_pipeline = [
 test_pipeline = [
     dict(
         type="LoadGeospatialImageFromFile",
-        to_float32=False,
-        nodata=image_nodata,
-        nodata_replace=image_nodata_replace,
-        channels_last=False
+        to_float32=image_to_float32,
     ),
     dict(type="BandsExtract", bands=bands),
-    dict(type="ConstantMultiply", constant=constant),
     dict(type="ToTensor", keys=["img"]),
-    # to channels first
-    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type="TorchNormalize", **img_norm_cfg),
     dict(
         type="Reshape",
         keys=["img"],
         new_shape=(len(bands), num_frames, -1, -1),
-        look_up={'2': 1, '3': 2}
+        look_up={"2": 1, "3": 2},
     ),
     dict(type="CastTensor", keys=["img"], new_type="torch.FloatTensor"),
     dict(
@@ -153,44 +143,39 @@ data = dict(
         type=dataset_type,
         CLASSES=CLASSES,
         data_root=data_root,
-        img_dir=img_dir,
-        ann_dir=ann_dir,
+        img_dir="training",
+        ann_dir="training",
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=train_pipeline,
         ignore_index=ignore_index,
-        split=splits["train"],
     ),
     val=dict(
         type=dataset_type,
         CLASSES=CLASSES,
         data_root=data_root,
-        img_dir=img_dir,
-        ann_dir=ann_dir,
+        img_dir="validation",
+        ann_dir="validation",
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=test_pipeline,
         ignore_index=ignore_index,
-        split=splits["val"],
-        gt_seg_map_loader_cfg=dict(nodata=label_nodata, nodata_replace=ignore_index)
     ),
     test=dict(
         type=dataset_type,
         CLASSES=CLASSES,
         data_root=data_root,
-        img_dir=img_dir,
-        ann_dir=ann_dir,
+        img_dir="validation",
+        ann_dir="validation",
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=test_pipeline,
         ignore_index=ignore_index,
-        split=splits["test"],
-        gt_seg_map_loader_cfg=dict(nodata=label_nodata, nodata_replace=ignore_index),
     ),
 )
 
 # Training
-optimizer = dict(type="Adam", lr=6e-5, weight_decay=0.05)
+optimizer = dict(type="Adam", lr=1.5e-5, betas=(0.9, 0.999), weight_decay=0.05)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy="poly",
@@ -203,30 +188,28 @@ lr_config = dict(
 )
 
 log_config = dict(
-    interval=10,
+    interval=20,
     hooks=[
-        dict(type="TextLoggerHook", by_epoch=True),
-        dict(type="TensorboardLoggerHook", by_epoch=True),
+        dict(type="TextLoggerHook", by_epoch=False),
+        dict(type="TensorboardLoggerHook", by_epoch=False),
     ],
 )
 
-checkpoint_config = dict(by_epoch=True, interval=10, out_dir=save_path)
-
-evaluation = dict(
-    interval=eval_epoch_interval,
-    metric="mIoU",
-    pre_eval=True,
-    save_best="mIoU",
+checkpoint_config = dict(
     by_epoch=True,
+    interval=10,
+    out_dir=save_path,
 )
 
-runner = dict(type="EpochBasedRunner", max_epochs=epochs)
+evaluation = dict(
+    interval=1180, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=False
+)
 
-workflow = [("train", 1), ("val", 1)]
+# runner = dict(type="EpochBasedRunner", max_epochs=epochs)
+runner = dict(type="IterBasedRunner", max_iters=6300)
+workflow = [("train", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
-
-ce_weights = [0.3, 0.7, 0]
 
 model = dict(
     type="TemporalEncoderDecoder",
@@ -258,7 +241,6 @@ model = dict(
         in_channels=embed_dim,
         type="FCNHead",
         in_index=-1,
-        ignore_index=ignore_index,
         channels=256,
         num_convs=1,
         concat_input=False,
@@ -266,16 +248,12 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type="CrossEntropyLoss",
-            use_sigmoid=False,
-            loss_weight=1,
-            class_weight=ce_weights,
+            type="DiceLoss", use_sigmoid=False, loss_weight=1, ignore_index=ignore_index
         ),
     ),
     auxiliary_head=dict(
         num_classes=num_classes,
         in_channels=embed_dim,
-        ignore_index=ignore_index,
         type="FCNHead",
         in_index=-1,
         channels=256,
@@ -285,10 +263,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type="CrossEntropyLoss",
-            use_sigmoid=False,
-            loss_weight=1,
-            class_weight=ce_weights,
+            type="DiceLoss", use_sigmoid=False, loss_weight=1, ignore_index=ignore_index
         ),
     ),
     train_cfg=dict(),
