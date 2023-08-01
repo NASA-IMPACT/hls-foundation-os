@@ -9,7 +9,6 @@
 # DeiT: https://github.com/facebookresearch/deit
 # --------------------------------------------------------
 
-from typing import List
 import numpy as np
 import torch
 import torch.nn as nn
@@ -18,6 +17,7 @@ from mmcv.runner import load_checkpoint
 from mmseg.models.builder import BACKBONES, NECKS
 from timm.models.layers import to_2tuple
 from timm.models.vision_transformer import Block
+from typing import List
 
 
 def _convTranspose2dOutput(
@@ -168,6 +168,107 @@ class Norm2d(nn.Module):
         x = x.permute(0, 3, 1, 2).contiguous()
         return x
 
+@NECKS.register_module()
+class GeospatialNeck(nn.Module):
+    """
+    Neck that transforms the token-based output of transformer into a single embedding suitable for processing with standard layers.
+    Performs 4 ConvTranspose2d operations on the rearranged input with kernel_size=2 and stride=2
+    """
+
+    def __init__(
+        self,
+        embed_dim: int,
+        first_conv_channels: int,
+        Hp: int = 14,
+        Wp: int = 14,
+        channel_reduction_factor: int = 2,
+        num_convs: int = 4,
+        num_convs_per_upscale: int = 1,
+        dropout: bool = False,
+        drop_cls_token: bool = True,
+    ):
+        """
+
+        Args:
+            embed_dim (int): Input embedding dimension
+            first_conv_channel (int): Number of channels for first dimension
+            Hp (int, optional): Height (in patches) of embedding to be upscaled. Defaults to 14.
+            Wp (int, optional): Width (in patches) of embedding to be upscaled. Defaults to 14.
+            channel_reduction_factor (int): Factor that each convolutional block reduces number of channels by.
+            num_convs (int): Number of convolutional upscaling blocks. Each upscales 2x.
+            drop_cls_token (bool, optional): Whether there is a cls_token, which should be dropped. This assumes the cls token is the first token. Defaults to True.
+        """
+        super().__init__()
+        self.drop_cls_token = drop_cls_token
+        self.Hp = Hp
+        self.Wp = Wp
+        self.H_out = Hp
+        self.W_out = Wp
+        self.dropout = dropout
+
+        conv_kernel_size = 3
+        conv_padding = 1
+
+        kernel_size = 2
+        stride = 2
+        dilation = 1
+        padding = 0
+        output_padding = 0
+
+        self.embed_dim = embed_dim
+        self.channels = [first_conv_channels // (channel_reduction_factor ** i) for i in range(num_convs)]
+        self.channels = [embed_dim] + self.channels
+
+        for _ in range(len(self.channels) - 1):
+            self.H_out = _convTranspose2dOutput(
+                self.H_out, stride, padding, dilation, kernel_size, output_padding
+            )
+            self.W_out = _convTranspose2dOutput(
+                self.W_out, stride, padding, dilation, kernel_size, output_padding
+            )
+        
+        def _build_upscale_block(channels_in, channels_out):
+            layers = []
+            layers.append(nn.ConvTranspose2d(
+                channels_in,
+                channels_out,
+                kernel_size=kernel_size,
+                stride=stride,
+                dilation=dilation,
+                padding=padding,
+                output_padding=output_padding,
+            ))
+
+            layers += [nn.Sequential(
+                      nn.Conv2d(channels_out,
+                      channels_out,
+                      kernel_size=conv_kernel_size,
+                      padding=conv_padding),
+                      nn.BatchNorm2d(channels_out),
+                      nn.Dropout() if self.dropout else nn.Identity(),
+                      nn.ReLU()) for _ in range(num_convs_per_upscale)]
+
+            return nn.Sequential(*layers)
+
+        self.layers = nn.ModuleList([
+            _build_upscale_block(self.channels[i], self.channels[i+1])
+            for i in range(len(self.channels) - 1)
+        ])
+
+    def forward(self, x):
+        x = x[0]
+        if self.drop_cls_token:
+            x = x[:, 1:, :]
+        x = x.permute(0, 2, 1).reshape(x.shape[0], -1, self.Hp, self.Wp)
+
+        for layer in self.layers:
+            x = layer(x)
+
+        x = x.reshape((x.shape[0], self.channels[-1], self.H_out, self.W_out))
+
+        out = tuple([x])
+
+        return out
 
 @NECKS.register_module()
 class ConvTransformerTokensToEmbeddingNeck(nn.Module):
@@ -184,7 +285,6 @@ class ConvTransformerTokensToEmbeddingNeck(nn.Module):
         Hp: int = 14,
         Wp: int = 14,
         drop_cls_token: bool = True,
-        
     ):
         """
 
@@ -382,7 +482,6 @@ class TemporalViTEncoder(nn.Module):
         elif isinstance(m, nn.LayerNorm):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
-
 
     def forward(self, x):
         # embed patches

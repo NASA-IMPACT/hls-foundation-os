@@ -1,6 +1,7 @@
 import os
 
 # base options
+
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None
@@ -13,15 +14,16 @@ custom_imports = dict(imports=["geospatial_fm"])
 ### Configs
 # Data
 # TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
-data_root = "<path to sen1floods11 root>"
+data_root = "<path to root directory of burn scars dataset>"
 
 dataset_type = "GeospatialDataset"
-num_classes=3
+num_classes = 2
 num_frames = 1
 img_size = 224
 num_workers = 2
 samples_per_gpu = 4
-CLASSES=(0,1,2)
+
+CLASSES=(0,1)
 
 img_norm_cfg = dict(means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526,0.12046503],
                     stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221 , 0.06834774, 0.05294205])
@@ -58,8 +60,8 @@ embed_dim = 768
 num_heads = 12
 tubelet_size = 1
 
-# TRAINING
-epochs=50
+
+epochs=100
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
@@ -75,6 +77,7 @@ train_pipeline = [
         to_float32=False,
         nodata=image_nodata,
         nodata_replace=image_nodata_replace,
+        channels_last=False
     ),
     dict(
         type="LoadGeospatialAnnotations",
@@ -86,6 +89,8 @@ train_pipeline = [
     dict(type="ConstantMultiply", constant=constant),
     dict(type="RandomFlip", prob=0.5),
     dict(type="ToTensor", keys=["img", "gt_semantic_seg"]),
+    # to channels first
+    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type="TorchNormalize", **img_norm_cfg),
     dict(type="TorchRandomCrop", crop_size=crop_size),
     dict(
@@ -105,10 +110,13 @@ test_pipeline = [
         to_float32=False,
         nodata=image_nodata,
         nodata_replace=image_nodata_replace,
+        channels_last=False
     ),
     dict(type="BandsExtract", bands=bands),
     dict(type="ConstantMultiply", constant=constant),
     dict(type="ToTensor", keys=["img"]),
+    # to channels first
+    dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type="TorchNormalize", **img_norm_cfg),
     dict(
         type="Reshape",
@@ -164,6 +172,7 @@ data = dict(
         pipeline=test_pipeline,
         ignore_index=ignore_index,
         split=splits["val"],
+        gt_seg_map_loader_cfg=dict(nodata=label_nodata, nodata_replace=ignore_index)
     ),
     test=dict(
         type=dataset_type,
@@ -196,21 +205,24 @@ lr_config = dict(
 log_config = dict(
     interval=10,
     hooks=[
-        dict(type='TextLoggerHook', by_epoch=True),
-        dict(type='TensorboardLoggerHook', by_epoch=True),
-    ])
-
-checkpoint_config = dict(
-    by_epoch=True, interval=10, out_dir=save_path 
+        dict(type="TextLoggerHook", by_epoch=True),
+        dict(type="TensorboardLoggerHook", by_epoch=True),
+    ],
 )
 
+checkpoint_config = dict(by_epoch=True, interval=10, out_dir=save_path)
+
 evaluation = dict(
-    interval=eval_epoch_interval, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
+    interval=eval_epoch_interval,
+    metric="mIoU",
+    pre_eval=True,
+    save_best="mIoU",
+    by_epoch=True,
 )
 
 runner = dict(type="EpochBasedRunner", max_epochs=epochs)
 
-workflow = [("train", 1),("val", 1)]
+workflow = [("train", 1), ("val", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
 
@@ -235,7 +247,7 @@ model = dict(
     ),
     neck=dict(
         type="ConvTransformerTokensToEmbeddingNeck",
-        embed_dim=num_frames*embed_dim,
+        embed_dim=num_frames * embed_dim,
         output_embed_dim=embed_dim,
         drop_cls_token=True,
         Hp=img_size // patch_size,
@@ -246,6 +258,7 @@ model = dict(
         in_channels=embed_dim,
         type="FCNHead",
         in_index=-1,
+        ignore_index=ignore_index,
         channels=256,
         num_convs=1,
         concat_input=False,
@@ -262,6 +275,7 @@ model = dict(
     auxiliary_head=dict(
         num_classes=num_classes,
         in_channels=embed_dim,
+        ignore_index=ignore_index,
         type="FCNHead",
         in_index=-1,
         channels=256,
@@ -278,5 +292,9 @@ model = dict(
         ),
     ),
     train_cfg=dict(),
-    test_cfg=dict(mode="slide", stride=(int(tile_size/2), int(tile_size/2)), crop_size=(tile_size, tile_size)),
+    test_cfg=dict(
+        mode="slide",
+        stride=(int(tile_size / 2), int(tile_size / 2)),
+        crop_size=(tile_size, tile_size),
+    ),
 )

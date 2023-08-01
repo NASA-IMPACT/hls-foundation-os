@@ -1,6 +1,6 @@
 
 ### Model and Inputs
-Prithvi is a first-of-its-kind temporal Vision transformer pretrained by the IBM and NASA team on continental US Harmonised Landsat Sentinel 2 (HLS) data. Particularly, the model adopts a self-supervised encoder developed with a ViT architecture and Masked AutoEncoder learning strategy, with a MSE as a loss function. The model includes spatial attention across multiple patchies and also temporal attention for each patch. 
+Prithvi is a first-of-its-kind temporal Vision transformer (ViT) pretrained by the IBM and NASA team on continental US Harmonised Landsat Sentinel 2 (HLS) data. Particularly, the model adopts a self-supervised encoder developed with a ViT architecture and Masked AutoEncoder learning strategy, with a Mean Squared Error (MSE) as a loss function. The model includes spatial attention across multiple patchies and also temporal attention for each patch. 
 
 ![](Prithvi_training.png)
 
@@ -8,7 +8,7 @@ The model expects remote sensing data in a video format (B, C, T, H, W). Note th
 other works around remote sensing modeling. Being able to handle a time series of remote sensing images can be very helpful to a variety of downstream tasks. The model can also handle static image which can be simply fed into the model with T=1.
 
 ### Pre-training
-The model was pre-trained with NASA's HLS2 L30 product (30m granularity) from Continental United States. The bands that were used are the following: 
+The model was pre-trained with NASA's HLS2 L30 product (30m granularity) from Continental United States for the year 2017. The bands that were used are the following: 
 
 * Blue
 * Green

@@ -1,23 +1,21 @@
 """
 This file holds pipeline components useful for loading remote sensing images and annotations.
 """
-import os.path as osp
-import torch
-
 import numpy as np
+import os.path as osp
 import rasterio
+import torch
 import torchvision.transforms.functional as F
+
+from tifffile import imread
 from mmcv.parallel import DataContainer as DC
 from mmseg.datasets.builder import PIPELINES
 from torchvision import transforms
 
 
 def open_tiff(fname):
-    with rasterio.open(fname, "r") as src:
-        data = src.read()
-
+    data = imread(fname)
     return data
-
 
 
 @PIPELINES.register_module()
@@ -50,17 +48,18 @@ class ConstantMultiply(object):
 
 @PIPELINES.register_module()
 class BandsExtract(object):
-    """Extract bands from image.
 
-    It extracts bands from an image
+    """Extract bands from image. Assumes channels last
+
+    It extracts bands from an image. Assumes channels last.
 
     Args:
-        bands (list, optional): The list of indexes to use for extraction. If not provided nothing will happen. 
+        bands (list, optional): The list of indexes to use for extraction. If not provided nothing will happen.
     """
-    def __init__(self,
-                 bands=None):
+
+    def __init__(self, bands=None):
         self.bands = bands
-    
+
     def __call__(self, results):
         """Call function to multiply extract bands
 
@@ -70,15 +69,11 @@ class BandsExtract(object):
         Returns:
             dict: Results with extracted bands
         """
-        
-        if self.bands is not None:
-            
-            img = results['img']
-            img = img[self.bands, :, :].copy()
-            results['img'] = img        
-        
-        return results
 
+        if self.bands is not None:
+            results["img"] = results["img"][..., self.bands]
+
+        return results
 
 
 @PIPELINES.register_module()
@@ -234,10 +229,35 @@ class CollectTestList(object):
 
 
 @PIPELINES.register_module()
+class TorchPermute(object):
+    """Permute dimensions.
+
+    Particularly useful in going from channels_last to channels_first
+
+    Args:
+        keys (Sequence[str]): Keys of results to be permuted.
+        order (Sequence[int]): New order of dimensions.
+    """
+
+    def __init__(self, keys, order):
+        self.keys = keys
+        self.order = order
+
+    def __call__(self, results):
+        for key in self.keys:
+            results[key] = results[key].permute(self.order)
+
+        return results
+
+    def __repr__(self):
+        return self.__class__.__name__ + f"(keys={self.keys}, order={self.order})"
+
+
+@PIPELINES.register_module()
 class LoadGeospatialImageFromFile(object):
     """
 
-    It loads a tiff image.
+    It loads a tiff image. Returns in channels last format, transposing if necessary according to channels_last argument.
 
     Args:
         to_float32 (bool): Whether to convert the loaded image to a float32
@@ -245,12 +265,17 @@ class LoadGeospatialImageFromFile(object):
             Defaults to False.
         nodata (float/int): no data value to substitute to nodata_replace
         nodata_replace (float/int): value to use to replace no data
+        channels_last (bool): whether the file has channels last format.
+            If False, will transpose to channels last format. Defaults to True.
     """
 
-    def __init__(self, to_float32=False, nodata=None, nodata_replace=0.0):
+    def __init__(
+        self, to_float32=False, nodata=None, nodata_replace=0.0, channels_last=True
+    ):
         self.to_float32 = to_float32
         self.nodata = nodata
         self.nodata_replace = nodata_replace
+        self.channels_last = channels_last
 
     def __call__(self, results):
         if results.get("img_prefix") is not None:
@@ -258,6 +283,10 @@ class LoadGeospatialImageFromFile(object):
         else:
             filename = results["img_info"]["filename"]
         img = open_tiff(filename)
+
+        if not self.channels_last:
+            img = np.transpose(img, (1, 2, 0))
+
         if self.to_float32:
             img = img.astype(np.float32)
 
@@ -387,27 +416,23 @@ class LoadGeospatialAnnotations(object):
         reduce_zero_label=False,
         nodata=None,
         nodata_replace=-1,
-        categorical_loop_up=None,
     ):
         self.reduce_zero_label = reduce_zero_label
         self.nodata = nodata
         self.nodata_replace = nodata_replace
 
     def __call__(self, results):
-        
         if results.get("seg_prefix", None) is not None:
             filename = osp.join(results["seg_prefix"], results["ann_info"]["seg_map"])
         else:
             filename = results["ann_info"]["seg_map"]
-            
+
         gt_semantic_seg = open_tiff(filename)
 
         if self.nodata is not None:
             gt_semantic_seg = np.where(
                 gt_semantic_seg == self.nodata, self.nodata_replace, gt_semantic_seg
             )
-
-
         # reduce zero_label
         if self.reduce_zero_label:
             # avoid using underflow conversion
@@ -421,9 +446,6 @@ class LoadGeospatialAnnotations(object):
             gt_semantic_seg_copy = gt_semantic_seg.copy()
             for old_id, new_id in results["label_map"].items():
                 gt_semantic_seg[gt_semantic_seg_copy == old_id] = new_id
-
-        # remove dimension
-        gt_semantic_seg = gt_semantic_seg.squeeze(0)
 
         results["gt_semantic_seg"] = gt_semantic_seg
         results["seg_fields"].append("gt_semantic_seg")
