@@ -87,8 +87,8 @@ This project builds on [MMSegmentation](https://mmsegmentation.readthedocs.io/en
 If this repository helped your research, please cite `HLS foundation` in your publications. Here is an example BibTeX entry:
 
 ```
-@software{HLS_Foundation_2023,
-    author = {Roy, Sujit and Ankur, Kumar and Phillips, Christopher and Ramasubramanian, Muthukumaran and Ramachandran, Iksha and Maskey, Manil and Olofossen, Pontus and Lee, Elizabeth and Murphy, Kevin and Duffy, Dan and Little, Mike and Jakubik, Johannes and Chu, Linsong and Fraccaro, Paolo and Das, Ranjini,Kamal and Kimura, Daiki and Simumba, Naomi and Szwarcman, Daniela and Michal, Michal and Weldemariam, Kommy and Zadrozny, Bianca and Ganti, Raghu and Costa, Carlos and Alemohammad, Hamed and Cecil, Michael and Li, Steve and Khallaghi, Sam and Godwin, Denys and Ahmadi, Maryam and Kordi, Fatemeh and Saux, Bertrand and Pastick, Neal and Doucette, Peter and Fleckenstein, Rylie and Luanga, Dalton and Corvin, Alex and Granger, Erwan},
+@misc{HLS_Foundation_2023,
+    author = {Roy, Sujit and Ankur, Kumar and Phillips, Christopher and Ramasubramanian, Muthukumaran and Gurung, Iksha and Ramachandran, Rahul and Maskey, Manil and Olofossen, Pontus and Lee, Elizabeth and Murphy, Kevin and Duffy, Dan and Little, Mike and Jakubik, Johannes and Chu, Linsong and Fraccaro, Paolo and Das, Ranjini,Kamal and Kimura, Daiki and Simumba, Naomi and Szwarcman, Daniela and Michal, Michal and Weldemariam, Kommy and Zadrozny, Bianca and Ganti, Raghu and Costa, Carlos and Alemohammad, Hamed and Cecil, Michael and Li, Steve and Khallaghi, Sam and Godwin, Denys and Ahmadi, Maryam and Kordi, Fatemeh and Saux, Bertrand and Pastick, Neal and Doucette, Peter and Fleckenstein, Rylie and Luanga, Dalton and Corvin, Alex and Granger, Erwan},
     doi    = {https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M},
     month  = aug,
     title  = {{HLS Foundation}},
