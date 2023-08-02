@@ -408,9 +408,8 @@ class LoadGeospatialAnnotations(object):
             Usually used for datasets where 0 is background label.
             Default: False.
         nodata (float/int): no data value to substitute to nodata_replace
-        nodata_replace (float/int): value to use to replace no data
-
-
+        nodata_replace (float/int): The value used to replace nodata values
+            with. Default: -1.
     """
 
     def __init__(
@@ -424,7 +423,10 @@ class LoadGeospatialAnnotations(object):
         self.nodata_replace = nodata_replace
 
     def __call__(self, results):
-        if results.get("seg_prefix", None) is not None:
+        if results.get("ann_info", {}).get("seg_map") is None:
+            results["ann_info"] = {"seg_map": results["img_info"]["ann"]["seg_map"]}
+
+        if results.get("seg_prefix") is not None:
             filename = osp.join(results["seg_prefix"], results["ann_info"]["seg_map"])
         else:
             filename = results["ann_info"]["seg_map"]
