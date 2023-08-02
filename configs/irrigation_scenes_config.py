@@ -72,15 +72,24 @@ splits = {
 
 # Pipelines
 train_pipeline = [
-    dict(type="LoadSpatioTemporalImagesFromFile", to_float32=image_to_float32),
+    dict(
+        type="LoadSpatioTemporalImagesFromFile",
+        to_float32=image_to_float32,
+        channels_last=True,
+    ),
     dict(
         type="LoadGeospatialAnnotations",
         reduce_zero_label=False,
         nodata=255,
         nodata_replace=2,
     ),
-    dict(type="RandomFlip", prob=0.5),
+    dict(type="RandomFlip", prob=0.5),  # flip on axis 1, assume channel last NHWC
     dict(type="ToTensor", keys=["img", "gt_semantic_seg"]),
+    dict(
+        type="TorchPermute",
+        keys=["img"],
+        order=(0, 3, 1, 2),  # channel last to channels first NCHW
+    ),
     dict(type="TorchNormalize", **img_norm_cfg),
     dict(type="TorchRandomCrop", crop_size=crop_size),
     dict(
@@ -94,7 +103,11 @@ train_pipeline = [
 ]
 
 val_pipeline = [
-    dict(type="LoadSpatioTemporalImagesFromFile", to_float32=image_to_float32),
+    dict(
+        type="LoadSpatioTemporalImagesFromFile",
+        to_float32=image_to_float32,
+        channels_last=True,
+    ),
     dict(
         type="LoadGeospatialAnnotations",
         reduce_zero_label=False,
@@ -102,6 +115,11 @@ val_pipeline = [
         nodata_replace=2,
     ),
     dict(type="ToTensor", keys=["img", "gt_semantic_seg"]),
+    dict(
+        type="TorchPermute",
+        keys=["img"],
+        order=(0, 3, 1, 2),  # channel last to channels first NCHW
+    ),
     dict(type="TorchNormalize", **img_norm_cfg),
     dict(type="TorchRandomCrop", crop_size=crop_size),
     dict(

@@ -3,7 +3,6 @@ This file holds pipeline components useful for loading remote sensing images and
 """
 import numpy as np
 import os.path as osp
-import rasterio
 import torch
 import torchvision.transforms.functional as F
 
@@ -373,7 +372,10 @@ class LoadSpatioTemporalImagesFromFile(LoadGeospatialImageFromFile):
             raise NotImplementedError
 
         img = np.stack(arrays=list(map(open_tiff, filenames)), axis=0)
-        # assert img.shape == (1, 6, 512, 512)  # Time, Channels, Height, Width
+        assert img.shape == (3, 512, 512, 6)  # Time, Height, Width, Channels
+        if not self.channels_last:
+            img = np.transpose(a=img, axes=(0, 2, 3, 1))
+            assert img.shape == (3, 6, 512, 512)  # Time, Channels, Height, Width
         if self.to_float32:
             img = img.astype(dtype=np.float32)
         if self.nodata is not None:
