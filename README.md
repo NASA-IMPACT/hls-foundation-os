@@ -1,6 +1,6 @@
 # Image segmentation by foundation model finetuning
 
-This repository shows three examples of how [Prithvi](https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M) can be finetuned for downstream tasks. These are flood detection using the Sentinel 2 data from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11) dataset, burn scars detection using the [NASA HLS fire scars dataset](https://huggingface.co/datasets/nasa-impact/hls_burn_scars) and multi-temporal crop classification using the [NASA HLS multi-temporal crop classification dataset](https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification).
+This repository shows three examples of how [Prithvi](https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M) can be finetuned for downstream tasks. These are flood detection using the Sentinel 2 data from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11) dataset, burn scars detection using the [NASA HLS fire scars dataset](https://huggingface.co/datasets/nasa-impact/hls_burn_scars) and multi-temporal crop classification using the [NASA HLS multi-temporal crop classification dataset](https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification). More details on each model can also be found in the model card part of the [IBM-NASA Hugging Face org page](https://huggingface.co/ibm-nasa-geospatial).
 
 ## The approach
 ### Background
@@ -55,7 +55,7 @@ Download the [NASA HLS multi-temporal crop classification dataset](https://huggi
     
     `mim train mmsegmentation --launcher pytorch configs/sen1floods11_config.py` or 
     
-    `mim train mmsegmentation --launcher pytorch configs/burn_scars_config.py` or
+    `mim train mmsegmentation --launcher pytorch configs/burn_scars.py` or
     
     `mim train mmsegmentation --launcher pytorch configs/multi_temporal_crop_classification.py`
     
@@ -63,7 +63,7 @@ Download the [NASA HLS multi-temporal crop classification dataset](https://huggi
     
     `mim test mmsegmentation configs/sen1floods11_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or 
     
-    `mim test mmsegmentation configs/burn_scars_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or
+    `mim test mmsegmentation configs/burn_scars.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or
     
     `mim test mmsegmentation configs/multi_temporal_crop_classification.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"`
 
