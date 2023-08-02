@@ -29,11 +29,7 @@ def parse_args():
     return args
 
 def open_tiff(fname):
-    
-    with rasterio.open(fname, "r") as src:
-        
-        data = src.read()
-        
+    data = imread(fname)
     return data
 
 def write_tiff(img_wrt, filename, metadata):
