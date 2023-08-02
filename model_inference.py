@@ -1,22 +1,18 @@
 import argparse
-from mmcv import Config
-
-from mmseg.models import build_segmentor
-
-from mmseg.datasets.pipelines import Compose, LoadImageFromFile
-
-import rasterio
-import torch
-
-from mmseg.apis import init_segmentor
-
-from mmcv.parallel import collate, scatter
-
-import numpy as np
 import glob
 import os
-
 import time
+
+import numpy as np
+import rasterio
+import torch
+from mmcv import Config
+from mmcv.parallel import collate, scatter
+from mmseg.apis import init_segmentor
+from mmseg.datasets.pipelines import Compose, LoadImageFromFile
+from mmseg.models import build_segmentor
+from tifffile import imread
+
 
 def parse_args():
     
