@@ -55,7 +55,7 @@ The [NASA HLS multi-temporal crop classification dataset](https://huggingface.co
     
     `mim train mmsegmentation --launcher pytorch configs/sen1floods11_config.py` or 
     
-    `mim train mmsegmentation --launcher pytorch configs/burn_scars_config.py` or
+    `mim train mmsegmentation --launcher pytorch configs/burn_scars.py` or
     
     `mim train mmsegmentation --launcher pytorch configs/multi_temporal_crop_classification.py`
     
@@ -63,7 +63,7 @@ The [NASA HLS multi-temporal crop classification dataset](https://huggingface.co
     
     `mim test mmsegmentation configs/sen1floods11_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or 
     
-    `mim test mmsegmentation configs/burn_scars_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or
+    `mim test mmsegmentation configs/burn_scars.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or
     
     `mim test mmsegmentation configs/multi_temporal_crop_classification.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"`
 
@@ -80,4 +80,19 @@ python model_inference.py -config /path/to/config/config.py -ckpt /path/to/check
 The `bands` parameter is useful in case the files used to run inference have the data in different orders/indexes than the original dataset.
 
 ## Additional documentation
-This project builds on [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) and [MMCV](https://mmcv.readthedocs.io/en/v1.5.0/). For additional documentation, consult their docs (Please note this is currently version 0.30.0 of MMSegmentation and version 1.5.0 of MMCV, not the latest versions).
+This project builds on [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) and [MMCV](https://mmcv.readthedocs.io/en/v1.5.0/). For additional documentation, consult their docs (please note this is currently version 0.30.0 of MMSegmentation and version 1.5.0 of MMCV, not latest).
+
+## Citation
+
+If this repository helped your research, please cite `HLS foundation` in your publications. Here is an example BibTeX entry:
+
+```
+@software{HLS_Foundation_2023,
+    author = {Jakubik, Johannes and Chu, Linsong and Fraccaro, Paolo and Bangalore, Ranjini and Lambhate, Devyani and Das, Kamal and Oliveira Borges, Dario and Kimura, Daiki and Simumba, Naomi and Szwarcman, Daniela and Muszynski, Michal and Weldemariam, Kommy and Zadrozny, Bianca and Ganti, Raghu and Costa, Carlos and Watson, Campbell and Mukkavilli, Karthik and Roy, Sujit and Phillips, Christopher and Ankur, Kumar and Ramasubramanian, Muthukumaran and Gurung, Iksha and Ji, Wei and Avery, Ryan and Ramachandran, Rahul and Maskey, Manil and Olofossen, Pontus and Fancher, Elizabeth and Lee, Tsengdar and Murphy, Kevin and Duffy, Dan and Little, Mike and Alemohammad, Hamed and Cecil, Michael and Li, Steve and Khallaghi, Sam and Godwin, Denys and Ahmadi, Maryam and Kordi, Fatemeh and Saux, Bertrand and Pastick, Neal and Doucette, Peter and Fleckenstein, Rylie and Luanga, Dalton and Corvin, Alex and Granger, Erwan},
+    doi    = {https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M},
+    month  = aug,
+    title  = {{HLS Foundation}},
+    url    = {https://github.com/nasa-impact/hls-foundation-os},
+    year   = {2023}
+}
+```
