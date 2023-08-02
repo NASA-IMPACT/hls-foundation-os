@@ -3,7 +3,6 @@ This file holds pipeline components useful for loading remote sensing images and
 """
 import numpy as np
 import os.path as osp
-import rasterio
 import torch
 import torchvision.transforms.functional as F
 
