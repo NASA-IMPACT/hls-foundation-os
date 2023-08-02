@@ -29,7 +29,7 @@ We reccomend doing after the `ToTensor` operation (which is also necessary at so
 1. Clone this repository
 2. `conda create -n <environment-name> python==3.9`
 3. `conda activate <environment-name>`
-4. Install torch (tested for >=1.7.1 and <=11) and torchvision (tested for >=0.8.2 and <=0.12). May vary with your system. Please check at: https://pytorch.org/get-started/previous-versions/.
+4. Install torch (tested for >=1.7.1 and <=1.11.0) and torchvision (tested for >=0.8.2 and <=0.12). May vary with your system. Please check at: https://pytorch.org/get-started/previous-versions/.
     1. e.g.: `pip install torch==1.11.0+cu115 torchvision==0.12.0+cu115 --extra-index-url https://download.pytorch.org/whl/cu115`
 5. `cd` into the cloned repo
 5. `pip install -e .`
