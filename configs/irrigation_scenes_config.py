@@ -13,7 +13,7 @@ custom_imports = dict(imports=["geospatial_fm"])
 ### Configs
 # Data
 # TO BE DEFINED BY USER: Data root to firescar downloaded dataset
-data_root = "../data/irrigation_scenes/"
+data_root = "data/irrigation_scenes/"
 
 dataset_type = "SpatioTemporalDataset"
 num_classes = 1
@@ -45,7 +45,7 @@ image_to_float32 = True
 
 # Model
 # TO BE DEFINED BY USER: path to pretrained backbone weights
-pretrained_weights_path = "../pretrain_ckpts/Prithvi_100M.pt"
+pretrained_weights_path = "pretrain_ckpts/Prithvi_100M.pt"
 num_layers = 12
 patch_size = 16
 embed_dim = 768
@@ -58,7 +58,7 @@ tubelet_size = 1
 
 # TO BE DEFINED BY USER: Save directory
 experiment = "test_1"
-project_dir = "../finetune_weights/irrigation_scenes"
+project_dir = "finetune_weights/irrigation_scenes"
 work_dir = os.path.join(project_dir, experiment)
 save_path = work_dir
 
