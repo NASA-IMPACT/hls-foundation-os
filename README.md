@@ -87,8 +87,8 @@ This project builds on [MMSegmentation](https://mmsegmentation.readthedocs.io/en
 If this repository helped your research, please cite `HLS foundation` in your publications. Here is an example BibTeX entry:
 
 ```
-@misc{HLS_Foundation_2023,
-    author = {Roy, Sujit and Ankur, Kumar and Phillips, Christopher and Ramasubramanian, Muthukumaran and Gurung, Iksha and Ramachandran, Rahul and Maskey, Manil and Olofossen, Pontus and Fancher, Elizabeth and Lee, Tsengdar and Murphy, Kevin and Duffy, Dan and Little, Mike and Jakubik, Johannes and Chu, Linsong and Fraccaro, Paolo and Banglore, Ranjini and Das, Kamal and Kimura, Daiki and Simumba, Naomi and Szwarcman, Daniela and Muszynski, Michal and Gomes, Carlos and Weldemariam, Kommy and Zadrozny, Bianca and Ganti, Raghu and Costa, Carlos and Alemohammad, Hamed and Cecil, Michael and Li, Steve and Khallaghi, Sam and Godwin, Denys and Ahmadi, Maryam and Kordi, Fatemeh and Saux, Bertrand and Pastick, Neal and Doucette, Peter and Fleckenstein, Rylie and Luanga, Dalton and Corvin, Alex and Granger, Erwan and Leong, Wei and Avery, Ryan},
+@software{HLS_Foundation_2023,
+    author = {Jakubik, Johannes and Chu, Linsong and Fraccaro, Paolo and Bangalore, Ranjini and Lambhate, Devyani and Das, Kamal and Oliveira Borges, Dario and Kimura, Daiki and Simumba, Naomi and Szwarcman, Daniela and Muszynski, Michal and Weldemariam, Kommy and Zadrozny, Bianca and Ganti, Raghu and Costa, Carlos and Watson, Campbell and Mukkavilli, Karthik and Roy, Sujit and Phillips, Christopher and Ankur, Kumar and Ramasubramanian, Muthukumaran and Gurung, Iksha and Ji, Wei and Avery, Ryan and Ramachandran, Rahul and Maskey, Manil and Olofossen, Pontus and Fancher, Elizabeth and Lee, Tsengdar and Murphy, Kevin and Duffy, Dan and Little, Mike and Alemohammad, Hamed and Cecil, Michael and Li, Steve and Khallaghi, Sam and Godwin, Denys and Ahmadi, Maryam and Kordi, Fatemeh and Saux, Bertrand and Pastick, Neal and Doucette, Peter and Fleckenstein, Rylie and Luanga, Dalton and Corvin, Alex and Granger, Erwan},
     doi    = {https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M},
     month  = aug,
     title  = {{HLS Foundation}},

@@ -143,6 +143,6 @@ authors:
   affiliation: "RedHat"
 title: "HLS Foundation"
 doi: https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M
+license: "Apache 2.0"
 date-released: 2023-08-03
-url: "https://github.com/nasa-impact/hls-foundation-os"
-
+repository-code: "https://github.com/nasa-impact/hls-foundation-os"
