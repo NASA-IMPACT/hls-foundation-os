@@ -152,14 +152,23 @@ val_pipeline = [
 ]
 
 test_pipeline = [
-    dict(type="LoadSpatioTemporalImagesFromFile", to_float32=image_to_float32),
+    dict(
+        type="LoadSpatioTemporalImagesFromFile",
+        to_float32=image_to_float32,
+        channels_last=True,
+    ),
     dict(type="ToTensor", keys=["img"]),
+    dict(
+        type="TorchPermute",
+        keys=["img"],
+        order=(0, 3, 1, 2),  # channel last to channels first NCHW
+    ),
     dict(type="TorchNormalize", **img_norm_cfg),
+    dict(type="TorchRandomCrop", crop_size=crop_size),  # TODO remove hardcoded 224 size
     dict(
         type="Reshape",
         keys=["img"],
-        new_shape=(len(bands), num_frames, -1, -1),
-        look_up={"2": 1, "3": 2},
+        new_shape=(len(bands), num_frames, tile_size, tile_size),
     ),
     dict(type="CastTensor", keys=["img"], new_type="torch.FloatTensor"),
     dict(
