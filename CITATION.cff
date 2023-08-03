@@ -64,6 +64,9 @@ authors:
 - family-names: "Mukkavilli"
   given-names: "Karthik"
   affiliation: "IBM Research"
+- family-names: "Parkin"
+  given-names: "Rob"
+  affiliation: "IBM Research"
 
 - family-names: "Roy"
   given-names: "Sujit"
