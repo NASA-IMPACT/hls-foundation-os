@@ -14,7 +14,7 @@ custom_imports = dict(imports=["geospatial_fm"])
 ### Configs
 # Data
 # TO BE DEFINED BY USER: Data root to sen1floods11 downloaded dataset
-data_root = "<path to root directory of burn scars dataset>"
+data_root = "<path to root directory of sen1floods11 dataset>"
 
 dataset_type = "GeospatialDataset"
 num_classes = 2
