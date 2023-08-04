@@ -4,9 +4,9 @@ This repository shows three examples of how [Prithvi](https://huggingface.co/ibm
 
 ## The approach
 ### Background
-To finetune for these tasks in this repository, we make use of [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/), which provides an extensible framework for segmentation tasks. 
+To finetune for these tasks in this repository, we make use of [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/), which provides an extensible framework for segmentation tasks.
 
-[MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) allows us to concatenate necks and heads appropriate for any segmentation downstream task to the encoder, and then perform the finetuning. This only requires setting up a config file detailing the desired model architecture, dataset setup and training strategy. 
+[MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) allows us to concatenate necks and heads appropriate for any segmentation downstream task to the encoder, and then perform the finetuning. This only requires the setup of a config file detailing the desired model architecture, dataset setup and training strategy.
 
 We build extensions on top of [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) to support our encoder and provide classes to read and augment remote sensing data (from .tiff files) using [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) data pipelines. These extensions can be found in the [geospatial_fm](./geospatial_fm/) directory, and they are installed as a package on the top of [MMSegmentation](https://mmsegmentation.readthedocs.io/en/0.x/) for ease of use. If more advanced functionality is necessary, it should be added there.
 
@@ -39,33 +39,27 @@ We reccomend implementing the change after the `ToTensor` operation (which is al
 
 ### Data
 
-The flood detection dataset can be downloaded from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11). Splits in the `mmsegmentation` format are available in the `data_splits` folders.
-
-
-The [NASA HLS fire scars dataset](https://huggingface.co/datasets/nasa-impact/hls_burn_scars) can be downloaded from Hugging Face.
-
-The [NASA HLS multi-temporal crop classification dataset](https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification) can be downloaded from Hugging Face.
-
+- Download the flood detection dataset from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11). Splits in the `mmsegmentation` format are available in the `data_splits` folders.
+- Download the [NASA HLS fire scars dataset](https://huggingface.co/datasets/nasa-impact/hls_burn_scars) from Hugging Face.
+- Download the [NASA HLS multi-temporal crop classification dataset](https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification) fro Hugging Face.
+- Download the [NASA HLS irrigation_scenes dataset](https://huggingface.co/datasets/ibm-nasa-geospatial/hls_irrigation_scenes) from HuggingFace.
 
 ## Running the finetuning
-1. In the `configs` folder there are three config examples for the three segmentation tasks. Complete the configs with your setup specifications. Parts that must be completed are marked with `#TO BE DEFINED BY USER`. They relate to the location where you downloaded the dataset, pretrained model weights, the test set (e.g. regular one or Bolivia out of bag data) and where you are going to save the experiment outputs.
+1. In the `configs` folder there are the three config examples for the three segmentation tasks. Complete the configs with your setup specifications. Parts that must be completed are marked with `#TO BE DEFINED BY USER`. They relate to where you downloaded the dataset, pretrained model weights, test set (e.g. regular one or Bolivia out of bag data) and where you are going to save the experiment outputs.
 
-2. 
-    a. With the conda env created above activated, run:
-    
-    `mim train mmsegmentation --launcher pytorch configs/sen1floods11_config.py` or 
-    
-    `mim train mmsegmentation --launcher pytorch configs/burn_scars.py` or
-    
-    `mim train mmsegmentation --launcher pytorch configs/multi_temporal_crop_classification.py`
-    
-    b. To run testing: 
-    
-    `mim test mmsegmentation configs/sen1floods11_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or 
-    
-    `mim test mmsegmentation configs/burn_scars.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or
-    
-    `mim test mmsegmentation configs/multi_temporal_crop_classification.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"`
+2.
+  a. With the conda env created above activated, run either of the commands below:
+
+    mim train mmsegmentation --launcher pytorch configs/sen1floods11_config.py
+    mim train mmsegmentation --launcher pytorch configs/burn_scars_config.py
+    mim train mmsegmentation --launcher pytorch configs/multi_temporal_crop_classification.py
+    mim train mmsegmentation --launcher pytorch configs/irrigation_scenes_config.py
+
+  b. To run testing:
+
+    mim test mmsegmentation configs/sen1floods11_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"
+    mim test mmsegmentation configs/burn_scars_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"
+    mim test mmsegmentation configs/multi_temporal_crop_classification.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"
 
 ## Checkpoints on Hugging Face
 We also provide checkpoints on Hugging Face for the [burn scars detection](https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M-burn-scar) and the [multi temporal crop classification tasks](https://huggingface.co/ibm-nasa-geospatial/Prithvi-100M-multi-temporal-crop-classification).

@@ -316,18 +316,100 @@ class LoadGeospatialImageFromFile(object):
 
 
 @PIPELINES.register_module()
+class LoadSpatioTemporalImagesFromFile(LoadGeospatialImageFromFile):
+    """
+    Load a time-series dataset from multiple files.
+
+    Currently hardcoded to assume that GeoTIFF files are structured in four
+    different 'monthX' folders like so:
+
+    - month1/
+      - scene_m01_XXXXXX_chip01.tif
+      - scene_m01_XXXXXX_chip02.tif
+    - month2/
+      - scene_m02_XXXXXX_chip01.tif
+      - scene_m02_XXXXXX_chip02.tif
+    - month3/
+      - scene_m03_XXXXXX_chip01.tif
+      - scene_m03_XXXXXX_chip02.tif
+    - month4/
+      - scene_m04_XXXXXX_chip01.tif
+      - scene_m04_XXXXXX_chip02.tif
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def __call__(self, results):
+        """
+        Call functions to load image and get image meta information.
+
+        Args:
+            results (dict): Result dict from :obj:`mmseg.CustomDataset`.
+
+        Returns:
+            dict: The dict contains loaded image and meta information.
+        """
+        if results.get("img_prefix") is not None:
+            img_prefix = results["img_prefix"]
+            assert img_prefix.endswith("month1")
+            filenames = [
+                osp.join(img_prefix, results["img_info"]["filename_t1"]),  # June
+                osp.join(
+                    img_prefix.replace("month1", "month2"),  # July
+                    results["img_info"]["filename_t2"],
+                ),
+                osp.join(
+                    img_prefix.replace("month1", "month3"),  # August
+                    results["img_info"]["filename_t3"],
+                ),
+                # osp.join(
+                #     img_prefix.replace("month1", "month4"), # September
+                #     results["img_info"]["filename_t4"],
+                # ),
+            ]
+        else:
+            raise NotImplementedError
+
+        img = np.stack(arrays=list(map(open_tiff, filenames)), axis=0)
+        assert img.shape == (3, 512, 512, 6)  # Time, Height, Width, Channels
+        if not self.channels_last:
+            img = np.transpose(a=img, axes=(0, 2, 3, 1))
+            assert img.shape == (3, 6, 512, 512)  # Time, Channels, Height, Width
+        if self.to_float32:
+            img = img.astype(dtype=np.float32)
+        if self.nodata is not None:
+            img = np.where(img == self.nodata, self.nodata_replace, img)
+
+        results["filename"] = filenames[0]
+        results["ori_filename"] = results["img_info"]["filename_t1"]
+        results["img"] = img
+        results["img_shape"] = img.shape
+        results["ori_shape"] = img.shape
+        # Set initial values for default meta_keys
+        results["pad_shape"] = img.shape
+        results["scale_factor"] = 1.0
+        results["flip"] = False
+        num_channels = 1 if len(img.shape) < 3 else img.shape[0]
+        results["img_norm_cfg"] = dict(
+            mean=np.zeros(num_channels, dtype=np.float32),
+            std=np.ones(num_channels, dtype=np.float32),
+            to_rgb=False,
+        )
+        return results
+
+
+@PIPELINES.register_module()
 class LoadGeospatialAnnotations(object):
     """Load annotations for semantic segmentation.
 
     Args:
-        to_uint8 (bool): Whether to convert the loaded label to a uint8
         reduce_zero_label (bool): Whether reduce all label value by 1.
             Usually used for datasets where 0 is background label.
             Default: False.
         nodata (float/int): no data value to substitute to nodata_replace
-        nodata_replace (float/int): value to use to replace no data
-
-
+        nodata_replace (float/int): The value used to replace nodata values
+            with. Default: -1.
     """
 
     def __init__(
@@ -341,7 +423,10 @@ class LoadGeospatialAnnotations(object):
         self.nodata_replace = nodata_replace
 
     def __call__(self, results):
-        if results.get("seg_prefix", None) is not None:
+        if results.get("ann_info", {}).get("seg_map") is None:
+            results["ann_info"] = {"seg_map": results["img_info"]["ann"]["seg_map"]}
+
+        if results.get("seg_prefix") is not None:
             filename = osp.join(results["seg_prefix"], results["ann_info"]["seg_map"])
         else:
             filename = results["ann_info"]["seg_map"]
