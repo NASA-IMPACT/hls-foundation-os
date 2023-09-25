@@ -53,11 +53,11 @@ The [NASA HLS multi-temporal crop classification dataset](https://huggingface.co
 2. 
     a. With the conda env created above activated, run:
     
-    `mim train mmsegmentation --launcher pytorch configs/sen1floods11_config.py` or 
+    `mim train mmsegmentation configs/sen1floods11_config.py` or 
     
-    `mim train mmsegmentation --launcher pytorch configs/burn_scars.py` or
+    `mim train mmsegmentation configs/burn_scars.py` or
     
-    `mim train mmsegmentation --launcher pytorch configs/multi_temporal_crop_classification.py`
+    `mim train mmsegmentation configs/multi_temporal_crop_classification.py`
     
     b. To run testing: 
     
