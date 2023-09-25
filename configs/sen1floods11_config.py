@@ -188,7 +188,7 @@ data = dict(
 )
 
 # Training
-optimizer = dict(type="Adam", lr=6e-5, weight_decay=0.05)
+optimizer = dict(type="AdamW", lr=1.5e-5, weight_decay=0.05, betas=(0.9, 0.999),)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy="poly",
