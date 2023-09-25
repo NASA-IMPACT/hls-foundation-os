@@ -226,7 +226,7 @@ workflow = [("train", 1), ("val", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
 
-ce_weights = [0.3, 0.7, 0]
+ce_weights = [0.3, 0.7]
 
 model = dict(
     type="TemporalEncoderDecoder",
