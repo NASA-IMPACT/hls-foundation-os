@@ -56,7 +56,7 @@ save_path = work_dir
 
 save_path = work_dir
 train_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=image_to_float32, channels_last=True),
+    dict(type='LoadGeospatialImageFromFile', to_float32=image_to_float32),
     dict(type='LoadGeospatialAnnotations', reduce_zero_label=False),
     dict(type='BandsExtract', bands=bands),
     dict(type='RandomFlip', prob=0.5),
@@ -74,7 +74,7 @@ train_pipeline = [
     dict(type='Collect', keys=['img', 'gt_semantic_seg'])
 ]
 test_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=image_to_float32, channels_last=True),
+    dict(type='LoadGeospatialImageFromFile', to_float32=image_to_float32),
     dict(type='BandsExtract', bands=bands),
     dict(type='ToTensor', keys=['img']),
     # to channels first
