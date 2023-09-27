@@ -71,7 +71,7 @@ tile_size = 224
 orig_nsize = 512
 crop_size = (tile_size, tile_size)
 train_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_last=True),
+    dict(type='LoadGeospatialImageFromFile', to_float32=True),
     dict(type='LoadGeospatialAnnotations', reduce_zero_label=True),
     dict(type='RandomFlip', prob=0.5),
     dict(type='ToTensor', keys=['img', 'gt_semantic_seg']),
@@ -86,7 +86,7 @@ train_pipeline = [
 ]
 
 test_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=True, channels_last=True),
+    dict(type='LoadGeospatialImageFromFile', to_float32=True),
     dict(type='ToTensor', keys=['img']),
      # to channels first
     dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),

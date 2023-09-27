@@ -9,12 +9,13 @@ import torchvision.transforms.functional as F
 from tifffile import imread
 from mmcv.parallel import DataContainer as DC
 from mmseg.datasets.builder import PIPELINES
+import rioxarray
 from torchvision import transforms
 
 
 def open_tiff(fname):
-    data = imread(fname)
-    return data
+    data = rioxarray.open_rasterio(fname)
+    return data.to_numpy()
 
 
 @PIPELINES.register_module()
@@ -256,7 +257,7 @@ class TorchPermute(object):
 class LoadGeospatialImageFromFile(object):
     """
 
-    It loads a tiff image. Returns in channels last format, transposing if necessary according to channels_last argument.
+    It loads a tiff image. Returns in channels last format.
 
     Args:
         to_float32 (bool): Whether to convert the loaded image to a float32
@@ -264,17 +265,14 @@ class LoadGeospatialImageFromFile(object):
             Defaults to False.
         nodata (float/int): no data value to substitute to nodata_replace
         nodata_replace (float/int): value to use to replace no data
-        channels_last (bool): whether the file has channels last format.
-            If False, will transpose to channels last format. Defaults to True.
     """
 
     def __init__(
-        self, to_float32=False, nodata=None, nodata_replace=0.0, channels_last=True
+        self, to_float32=False, nodata=None, nodata_replace=0.0
     ):
         self.to_float32 = to_float32
         self.nodata = nodata
         self.nodata_replace = nodata_replace
-        self.channels_last = channels_last
 
     def __call__(self, results):
         if results.get("img_prefix") is not None:
@@ -282,9 +280,8 @@ class LoadGeospatialImageFromFile(object):
         else:
             filename = results["img_info"]["filename"]
         img = open_tiff(filename)
-
-        if not self.channels_last:
-            img = np.transpose(img, (1, 2, 0))
+        # to channels last format
+        img = np.transpose(img, (1, 2, 0))
 
         if self.to_float32:
             img = img.astype(np.float32)
