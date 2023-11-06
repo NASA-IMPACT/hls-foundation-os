@@ -19,7 +19,8 @@ We use a simple architecture that adds a neck and segmentation head to the backb
 
 ### The pipeline
 Additionally, we provide extra components for data loading pipelines in [geospatial_pipelines.py](./geospatial_fm/geospatial_pipelines.py). These are documented in the file.
-We observe the MMCV convention that all operations assumes a channel-last format. Our tiff loader also assumes this is the format in which files are written, and offers a flag to automatically transpose a to channel-last format if this is not the case.
+
+We observe the MMCV convention that all operations assume a channel-last format. 
 *However*, we also introduce some components with the prefix `Torch`, such as `TorchNormalize`. These components assume the torch convention of channel-first.
 
 At some point during the pipeline, before feeding the data to the model, it is necessary to change to channel-first format.
