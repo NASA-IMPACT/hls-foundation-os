@@ -74,8 +74,7 @@ train_pipeline = [
         type="LoadGeospatialImageFromFile",
         to_float32=False,
         nodata=image_nodata,
-        nodata_replace=image_nodata_replace,
-        channels_last=False
+        nodata_replace=image_nodata_replace
     ),
     dict(
         type="LoadGeospatialAnnotations",
@@ -107,8 +106,7 @@ test_pipeline = [
         type="LoadGeospatialImageFromFile",
         to_float32=False,
         nodata=image_nodata,
-        nodata_replace=image_nodata_replace,
-        channels_last=False
+        nodata_replace=image_nodata_replace
     ),
     dict(type="BandsExtract", bands=bands),
     dict(type="ConstantMultiply", constant=constant),
