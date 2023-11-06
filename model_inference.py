@@ -10,8 +10,6 @@ from mmcv import Config
 from mmcv.parallel import collate, scatter
 from mmseg.apis import init_segmentor
 from mmseg.datasets.pipelines import Compose, LoadImageFromFile
-from mmseg.models import build_segmentor
-from tifffile import imread
 
 
 def parse_args():
@@ -22,14 +20,18 @@ def parse_args():
     parser.add_argument('-input', help='path to input images folder for inference')
     parser.add_argument('-output', help='path to save output image')
     parser.add_argument('-input_type', help='file type of input images',default="tif")
-    parser.add_argument('-bands', help='bands in the file where to find the relevant data',default=None)
+    parser.add_argument('-bands', help='bands in the file where to find the relevant data', type=int, nargs="+")
     
     args = parser.parse_args()
     
     return args
 
 def open_tiff(fname):
-    data = imread(fname)
+    
+    with rasterio.open(fname, "r") as src:
+        
+        data = src.read()
+        
     return data
 
 def write_tiff(img_wrt, filename, metadata):
@@ -150,7 +152,7 @@ def process_test_pipeline(custom_test_pipeline, bands=None):
         
         if len(extract_index) > 0:
             
-            custom_test_pipeline[extract_index[0]]['bands'] = eval(bands)
+            custom_test_pipeline[extract_index[0]]['bands'] = bands
             
     collect_index = [i for i, x in enumerate(custom_test_pipeline) if x['type'].find('Collect') > -1]
     
@@ -171,7 +173,7 @@ def inference_on_files(config_path, ckpt, input_type, input_path, output_path, b
     model = init_segmentor(config, ckpt)
     
     # identify images to predict on
-    target_images = glob.glob(input_path+"*."+input_type)
+    target_images = glob.glob(os.path.join(input_path, "*."+input_type))
     
     print('Identified images to predict on: ' + str(len(target_images)))
     
@@ -184,9 +186,8 @@ def inference_on_files(config_path, ckpt, input_type, input_path, output_path, b
         
     # for each image predict and save to disk  
     for i, target_image in enumerate(target_images):
-        
         print(f'Working on Image {i}')
-        output_image = output_path+target_image.split("/")[-1].replace('.' + input_type, '_pred.'+input_type)
+        output_image = os.path.join(output_path, target_image.split("/")[-1].replace('.' + input_type, '_pred.'+input_type))
         
         inference_on_file(model, target_image, output_image, custom_test_pipeline)
 
