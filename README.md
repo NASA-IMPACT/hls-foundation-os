@@ -25,6 +25,11 @@ We observe the MMCV convention that all operations assume a channel-last format.
 
 At some point during the pipeline, before feeding the data to the model, it is necessary to change to channel-first format.
 We reccomend implementing the change after the `ToTensor` operation (which is also necessary at some point), using the `TorchPermute` operation.
+
+### Tutorial
+Check out the [exploration notebook](./exploration.ipynb) for a more in depth example of the usage of the model.
+
+
 ## Setup
 ### Dependencies
 1. Clone this repository
