@@ -43,6 +43,26 @@ Check out the [exploration notebook](./exploration.ipynb) for a more in depth ex
 7. `mim install mmcv-full==1.6.2 -f https://download.openmmlab.com/mmcv/dist/{cuda_version}/{torch_version}/index.html`. Note that pre-built wheels (fast installs without needing to build) only exist for some versions of torch and CUDA. Check compatibilities here: https://mmcv.readthedocs.io/en/v1.6.2/get_started/installation.html
     1. e.g.: `mim install mmcv-full==1.6.2 -f https://download.openmmlab.com/mmcv/dist/cu115/torch1.11.0/index.html`
 
+
+### Alternate Setup (Windows Users - Tested for Windows 10)
+
+1. `conda create -n <environment-name> python=3.9`
+2. `conda activate <environment-name>`
+3. Install torch (tested for >=1.7.1 and <=1.11.0) and torchvision (tested for >=0.8.2 and <=0.12). May vary with your system. Please check at: https://pytorch.org/get-started/previous-versions/.
+    1. e.g.: `pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113` 
+4. `git clone https://github.com/NASA-IMPACT/hls-foundation-os.git <your-local-path>\hls-foundation-os`
+5. `git clone https://github.com/open-mmlab/mmsegmentation.git <your-local-path>\mmsegmentation` 
+6. `cd <your-local-path>\mmsegmentation` 
+7. Checkout mmsegmentation version compatible with hls-foundation: `git checkout 186572a3ce64ac9b6b37e66d58c76515000c3280`
+8. modify setup.py so it installs from the cloned mmsegmentation. Change line `mmsegmentation @ git+https://github.com/open-mmlab/mmsegmentation.git@186572a3ce64ac9b6b37e66d58c76515000c3280` to `mmsegmentation @ file:///<your-local-path>/mmsegmentation`
+9. `cd <your-local-path>\hls-foundation-os`
+10. `pip install -e .`
+11. `pip install -U openmim`
+12. `mim install mmcv-full==1.6.2 -f https://download.openmmlab.com/mmcv/dist/{cuda_version}/{torch_version}/index.html`. Note that pre-built wheels (fast installs without needing to build) only exist for some versions of torch and CUDA. Check compatibilities here: https://mmcv.readthedocs.io/en/v1.6.2/get_started/installation.html
+    1. e.g.: `mim install mmcv-full==1.6.2 -f https://download.openmmlab.com/mmcv/dist/cu115/torch1.11.0/index.html`
+13. `conda install -c conda-forge opencv`
+14. `pip install datasets` 
+
 ### Data
 
 The flood detection dataset can be downloaded from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11). Splits in the `mmsegmentation` format are available in the `data_splits` folders.
