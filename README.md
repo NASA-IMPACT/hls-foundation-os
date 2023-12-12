@@ -84,8 +84,10 @@ The [NASA HLS multi-temporal crop classification dataset](https://huggingface.co
     `mim train mmsegmentation configs/burn_scars.py` or
     
     `mim train mmsegmentation configs/multi_temporal_crop_classification.py`
+
+    b. Multi-gpu training can be run by adding `--launcher pytorch --gpus <number of gpus>`
     
-    b. To run testing: 
+    c. To run testing: 
     
     `mim test mmsegmentation configs/sen1floods11_config.py --checkpoint /path/to/best/checkpoint/model.pth --eval "mIoU"` or 
     
