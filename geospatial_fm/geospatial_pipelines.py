@@ -1,15 +1,13 @@
 """
 This file holds pipeline components useful for loading remote sensing images and annotations.
 """
-import numpy as np
 import os.path as osp
-import torch
-import torchvision.transforms.functional as F
 
-from tifffile import imread
+import numpy as np
+import rioxarray
+import torchvision.transforms.functional as F
 from mmcv.parallel import DataContainer as DC
 from mmseg.datasets.builder import PIPELINES
-import rioxarray
 from torchvision import transforms
 
 
@@ -267,9 +265,7 @@ class LoadGeospatialImageFromFile(object):
         nodata_replace (float/int): value to use to replace no data
     """
 
-    def __init__(
-        self, to_float32=False, nodata=None, nodata_replace=0.0
-    ):
+    def __init__(self, to_float32=False, nodata=None, nodata_replace=0.0):
         self.to_float32 = to_float32
         self.nodata = nodata
         self.nodata_replace = nodata_replace
@@ -343,7 +339,7 @@ class LoadGeospatialAnnotations(object):
         else:
             filename = results["ann_info"]["seg_map"]
 
-        gt_semantic_seg = open_tiff(filename)
+        gt_semantic_seg = open_tiff(filename).squeeze()
 
         if self.nodata is not None:
             gt_semantic_seg = np.where(

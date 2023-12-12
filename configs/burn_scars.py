@@ -57,7 +57,7 @@ patch_size = 16
 embed_dim = 768
 num_heads = 12
 tubelet_size = 1
-output_embed_dim = num_frames*embed_dim
+output_embed_dim = num_frames * embed_dim
 max_intervals = 10000
 evaluation_interval = 1000
 
@@ -69,11 +69,11 @@ save_path = work_dir
 
 save_path = work_dir
 train_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=image_to_float32),
-    dict(type='LoadGeospatialAnnotations', reduce_zero_label=False),
-    dict(type='BandsExtract', bands=bands),
-    dict(type='RandomFlip', prob=0.5),
-    dict(type='ToTensor', keys=['img', 'gt_semantic_seg']),
+    dict(type="LoadGeospatialImageFromFile", to_float32=image_to_float32),
+    dict(type="LoadGeospatialAnnotations", reduce_zero_label=False),
+    dict(type="BandsExtract", bands=bands),
+    dict(type="RandomFlip", prob=0.5),
+    dict(type="ToTensor", keys=["img", "gt_semantic_seg"]),
     # to channels first
     dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type="TorchNormalize", **img_norm_cfg),
@@ -81,29 +81,16 @@ train_pipeline = [
     dict(
         type="Reshape",
         keys=["img"],
-        new_shape=(
-            len(bands),
-            num_frames,
-            tile_size,
-            tile_size
-        )
+        new_shape=(len(bands), num_frames, tile_size, tile_size),
     ),
-    dict(
-        type="Reshape",
-        keys=["gt_semantic_seg"],
-        new_shape=(1, tile_size, tile_size)
-    ),
-    dict(
-        type="CastTensor",
-        keys=["gt_semantic_seg"],
-        new_type="torch.LongTensor"
-    ),
-    dict(type="Collect", keys=["img", "gt_semantic_seg"])
+    dict(type="Reshape", keys=["gt_semantic_seg"], new_shape=(1, tile_size, tile_size)),
+    dict(type="CastTensor", keys=["gt_semantic_seg"], new_type="torch.LongTensor"),
+    dict(type="Collect", keys=["img", "gt_semantic_seg"]),
 ]
 test_pipeline = [
-    dict(type='LoadGeospatialImageFromFile', to_float32=image_to_float32),
-    dict(type='BandsExtract', bands=bands),
-    dict(type='ToTensor', keys=['img']),
+    dict(type="LoadGeospatialImageFromFile", to_float32=image_to_float32),
+    dict(type="BandsExtract", bands=bands),
+    dict(type="ToTensor", keys=["img"]),
     # to channels first
     dict(type="TorchPermute", keys=["img"], order=(2, 0, 1)),
     dict(type="TorchNormalize", **img_norm_cfg),
@@ -111,10 +98,8 @@ test_pipeline = [
         type="Reshape",
         keys=["img"],
         new_shape=(len(bands), num_frames, -1, -1),
-        look_up=dict({
-            "2": 1,
-            "3": 2
-        })),
+        look_up=dict({"2": 1, "3": 2}),
+    ),
     dict(type="CastTensor", keys=["img"], new_type="torch.FloatTensor"),
     dict(
         type="CollectTestList",
@@ -131,9 +116,9 @@ test_pipeline = [
             "ori_shape",
             "pad_shape",
             "scale_factor",
-            "img_norm_cfg"
-        ]
-    )
+            "img_norm_cfg",
+        ],
+    ),
 ]
 
 CLASSES = ("Unburnt land", "Burn scar")
@@ -150,7 +135,8 @@ data = dict(
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=train_pipeline,
-        ignore_index=-1),
+        ignore_index=-1,
+    ),
     val=dict(
         type=dataset_type,
         CLASSES=CLASSES,
@@ -160,7 +146,8 @@ data = dict(
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=test_pipeline,
-        ignore_index=-1),
+        ignore_index=-1,
+    ),
     test=dict(
         type=dataset_type,
         CLASSES=CLASSES,
@@ -170,8 +157,8 @@ data = dict(
         img_suffix=img_suffix,
         seg_map_suffix=seg_map_suffix,
         pipeline=test_pipeline,
-        ignore_index=-1
-    )
+        ignore_index=-1,
+    ),
 )
 
 optimizer = dict(type="Adam", lr=1.3e-05, betas=(0.9, 0.999))
@@ -183,34 +170,25 @@ lr_config = dict(
     warmup_ratio=1e-06,
     power=1.0,
     min_lr=0.0,
-    by_epoch=False
+    by_epoch=False,
 )
 log_config = dict(
     interval=20,
     hooks=[
         dict(type="TextLoggerHook", by_epoch=False),
-        dict(type="TensorboardLoggerHook", by_epoch=False)
-    ]
+        dict(type="TensorboardLoggerHook", by_epoch=False),
+    ],
 )
-checkpoint_config = dict(
-    by_epoch=True,
-    interval=10,
-    out_dir=save_path 
-)
+checkpoint_config = dict(by_epoch=True, interval=10, out_dir=save_path)
 evaluation = dict(
     interval=evaluation_interval,
     metric="mIoU",
     pre_eval=True,
     save_best="mIoU",
-    by_epoch=False
+    by_epoch=False,
 )
 
-loss_func = dict(
-    type="DiceLoss",
-    use_sigmoid=False,
-    loss_weight=1,
-    ignore_index=-1
-)
+loss_func = dict(type="DiceLoss", use_sigmoid=False, loss_weight=1, ignore_index=-1)
 
 runner = dict(type="IterBasedRunner", max_iters=max_intervals)
 workflow = [("train", 1)]
@@ -230,15 +208,15 @@ model = dict(
         depth=12,
         num_heads=num_heads,
         mlp_ratio=4.0,
-        norm_pix_loss=False
+        norm_pix_loss=False,
     ),
     neck=dict(
         type="ConvTransformerTokensToEmbeddingNeck",
-        embed_dim=embed_dim*num_frames,
+        embed_dim=embed_dim * num_frames,
         output_embed_dim=output_embed_dim,
         drop_cls_token=True,
         Hp=14,
-        Wp=14
+        Wp=14,
     ),
     decode_head=dict(
         num_classes=len(CLASSES),
@@ -251,7 +229,7 @@ model = dict(
         dropout_ratio=0.1,
         norm_cfg=dict(type="BN", requires_grad=True),
         align_corners=False,
-        loss_decode=loss_func
+        loss_decode=loss_func,
     ),
     auxiliary_head=dict(
         num_classes=len(CLASSES),
@@ -264,7 +242,7 @@ model = dict(
         dropout_ratio=0.1,
         norm_cfg=dict(type="BN", requires_grad=True),
         align_corners=False,
-        loss_decode=loss_func
+        loss_decode=loss_func,
     ),
     train_cfg=dict(),
     test_cfg=dict(
@@ -273,5 +251,4 @@ model = dict(
         crop_size=(tile_size, tile_size),
     ),
 )
-gpu_ids = range(0, 1)
 auto_resume = False

@@ -1,8 +1,8 @@
 import os
 
 # base options
-dist_params = dict(backend='nccl')
-log_level = 'INFO'
+dist_params = dict(backend="nccl")
+log_level = "INFO"
 load_from = None
 resume_from = None
 cudnn_benchmark = True
@@ -16,15 +16,17 @@ custom_imports = dict(imports=["geospatial_fm"])
 data_root = "<path to root directory of sen1floods11 dataset>"
 
 dataset_type = "GeospatialDataset"
-num_classes=2
+num_classes = 2
 num_frames = 1
 img_size = 224
 num_workers = 2
 samples_per_gpu = 4
-CLASSES=(0,1)
+CLASSES = (0, 1)
 
-img_norm_cfg = dict(means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526,0.12046503],
-                    stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221 , 0.06834774, 0.05294205])
+img_norm_cfg = dict(
+    means=[0.14245495, 0.13921481, 0.12434631, 0.31420089, 0.20743526, 0.12046503],
+    stds=[0.04036231, 0.04186983, 0.05267646, 0.0822221, 0.06834774, 0.05294205],
+)
 
 bands = [1, 2, 3, 8, 11, 12]
 tile_size = img_size
@@ -59,7 +61,7 @@ num_heads = 12
 tubelet_size = 1
 
 # TRAINING
-epochs=100
+epochs = 100
 eval_epoch_interval = 5
 
 # TO BE DEFINED BY USER: Save directory
@@ -74,7 +76,7 @@ train_pipeline = [
         type="LoadGeospatialImageFromFile",
         to_float32=False,
         nodata=image_nodata,
-        nodata_replace=image_nodata_replace
+        nodata_replace=image_nodata_replace,
     ),
     dict(
         type="LoadGeospatialAnnotations",
@@ -106,7 +108,7 @@ test_pipeline = [
         type="LoadGeospatialImageFromFile",
         to_float32=False,
         nodata=image_nodata,
-        nodata_replace=image_nodata_replace
+        nodata_replace=image_nodata_replace,
     ),
     dict(type="BandsExtract", bands=bands),
     dict(type="ConstantMultiply", constant=constant),
@@ -118,7 +120,7 @@ test_pipeline = [
         type="Reshape",
         keys=["img"],
         new_shape=(len(bands), num_frames, -1, -1),
-        look_up={'2': 1, '3': 2}
+        look_up={"2": 1, "3": 2},
     ),
     dict(type="CastTensor", keys=["img"], new_type="torch.FloatTensor"),
     dict(
@@ -168,7 +170,7 @@ data = dict(
         pipeline=test_pipeline,
         ignore_index=ignore_index,
         split=splits["val"],
-        gt_seg_map_loader_cfg=dict(nodata=label_nodata, nodata_replace=ignore_index)
+        gt_seg_map_loader_cfg=dict(nodata=label_nodata, nodata_replace=ignore_index),
     ),
     test=dict(
         type=dataset_type,
@@ -186,7 +188,12 @@ data = dict(
 )
 
 # Training
-optimizer = dict(type="AdamW", lr=1.5e-5, weight_decay=0.05, betas=(0.9, 0.999),)
+optimizer = dict(
+    type="AdamW",
+    lr=1.5e-5,
+    weight_decay=0.05,
+    betas=(0.9, 0.999),
+)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy="poly",
@@ -201,21 +208,24 @@ lr_config = dict(
 log_config = dict(
     interval=10,
     hooks=[
-        dict(type='TextLoggerHook', by_epoch=True),
-        dict(type='TensorboardLoggerHook', by_epoch=True),
-    ])
-
-checkpoint_config = dict(
-    by_epoch=True, interval=10, out_dir=save_path 
+        dict(type="TextLoggerHook", by_epoch=True),
+        dict(type="TensorboardLoggerHook", by_epoch=True),
+    ],
 )
 
+checkpoint_config = dict(by_epoch=True, interval=10, out_dir=save_path)
+
 evaluation = dict(
-    interval=eval_epoch_interval, metric="mIoU", pre_eval=True, save_best="mIoU", by_epoch=True
+    interval=eval_epoch_interval,
+    metric="mIoU",
+    pre_eval=True,
+    save_best="mIoU",
+    by_epoch=True,
 )
 
 runner = dict(type="EpochBasedRunner", max_epochs=epochs)
 
-workflow = [("train", 1),("val", 1)]
+workflow = [("train", 1), ("val", 1)]
 
 norm_cfg = dict(type="BN", requires_grad=True)
 
@@ -240,7 +250,7 @@ model = dict(
     ),
     neck=dict(
         type="ConvTransformerTokensToEmbeddingNeck",
-        embed_dim=num_frames*embed_dim,
+        embed_dim=num_frames * embed_dim,
         output_embed_dim=embed_dim,
         drop_cls_token=True,
         Hp=img_size // patch_size,
@@ -263,7 +273,7 @@ model = dict(
             use_sigmoid=False,
             loss_weight=1,
             class_weight=ce_weights,
-            avg_non_ignore=True
+            avg_non_ignore=True,
         ),
     ),
     auxiliary_head=dict(
@@ -283,9 +293,13 @@ model = dict(
             use_sigmoid=False,
             loss_weight=1,
             class_weight=ce_weights,
-            avg_non_ignore=True
+            avg_non_ignore=True,
         ),
     ),
     train_cfg=dict(),
-    test_cfg=dict(mode="slide", stride=(int(tile_size/2), int(tile_size/2)), crop_size=(tile_size, tile_size)),
+    test_cfg=dict(
+        mode="slide",
+        stride=(int(tile_size / 2), int(tile_size / 2)),
+        crop_size=(tile_size, tile_size),
+    ),
 )
