@@ -57,12 +57,6 @@ dataset_type = "GeospatialDataset"
 # TO BE DEFINED BY USER: data directory
 data_root = "<path to data root>"
 
-splits = dict(
-    train="<path to train split>",
-    val="<path to val split>",
-    test="<path to test split>",
-)
-
 img_norm_cfg = dict(
     means=[
         494.905781,
@@ -193,7 +187,6 @@ data = dict(
         pipeline=train_pipeline,
         img_suffix="_merged.tif",
         seg_map_suffix=".mask.tif",
-        split=splits["train"],
     ),
     val=dict(
         type=dataset,
@@ -205,7 +198,6 @@ data = dict(
         pipeline=test_pipeline,
         img_suffix="_merged.tif",
         seg_map_suffix=".mask.tif",
-        split=splits["val"],
     ),
     test=dict(
         type=dataset,
@@ -217,7 +209,6 @@ data = dict(
         pipeline=test_pipeline,
         img_suffix="_merged.tif",
         seg_map_suffix=".mask.tif",
-        split=splits["val"],
     ),
 )
 
