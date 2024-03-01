@@ -72,6 +72,49 @@ The [NASA HLS fire scars dataset](https://huggingface.co/datasets/nasa-impact/hl
 
 The [NASA HLS multi-temporal crop classification dataset](https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification) can be downloaded from Hugging Face.
 
+Using git-lfs you can download the data as in the following example: 
+``` sh
+# from: https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification
+
+# Make sure you have git-lfs installed (https://git-lfs.com)
+git lfs install
+git clone https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification
+
+# extract files
+cd multi-temporal-crop-classification
+tar -xvf training_chips.tgz && tar -xvf validation_chips.tgz
+```
+
+Without git-lfs (Credit @robmarkcole):
+```sh
+mkdir data
+cd data
+
+mkdir multi-temporal-crop-classification
+cd multi-temporal-crop-classification
+
+# not this can take some time and appear to hang, be patient
+wget https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification/resolve/main/training_chips.tgz?download=true -O training_chips.tgz
+tar -xvzf training_chips.tgz
+
+wget https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification/resolve/main/validation_chips.tgz?download=true -O validation_chips.tgz
+tar -xvzf validation_chips.tgz
+
+# delete some mac-os added files
+find . -name '._*' -delete
+
+# the following are NOT required (TBC)
+https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification/resolve/main/training_data.txt
+https://huggingface.co/datasets/ibm-nasa-geospatial/multi-temporal-crop-classification/resolve/main/validation_data.txt
+
+# instead copy over the files from the splits directory to the location of the images
+
+cd ..
+mkdir hls_burn_scars
+cd hls_burn_scars
+wget https://huggingface.co/datasets/ibm-nasa-geospatial/hls_burn_scars/resolve/main/hls_burn_scars.tar.gz?download=true -O hls_burn_scars.tar.gz
+tar -xvf hls_burn_scars.tar.gz
+```
 
 ## Running the finetuning
 1. In the `configs` folder there are three config examples for the three segmentation tasks. Complete the configs with your setup specifications. Parts that must be completed are marked with `#TO BE DEFINED BY USER`. They relate to the location where you downloaded the dataset, pretrained model weights, the test set (e.g. regular one or Bolivia out of bag data) and where you are going to save the experiment outputs.
