@@ -65,6 +65,33 @@ Check out the [exploration notebook](./exploration.ipynb) for a more in depth ex
 13. `conda install -c conda-forge opencv`
 14. `pip install datasets` 
 
+#### Note: 
+If you're getting 
+```
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.2 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some modules may need to rebuild instead, e.g., with 'pybind11>=2.12'.
+```
+Make sure you have numpy version that is less than 2.
+
+```sh
+pip uninstall numpy
+pip install numpy==1.24.0
+```
+
+#### **Additional Note: For Windows Users**
+If building wheel is failing while installing numpy==1.24.0, go ahead and
+download [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/):
+
+Open the installer, then follow the steps.
+1. Select: Workloads → Desktop development with C++
+2. Then for Individual Components, select only:
+    - Windows 10 SDK
+    - C++ x64/x86 build tools
+
+After it's installed run `pip install numpy==1.24.0`.
+
 ### Data
 
 The flood detection dataset can be downloaded from [Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11). Splits in the `mmsegmentation` format are available in the `data_splits` folders.
